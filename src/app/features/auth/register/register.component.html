@@ -1,0 +1,199 @@
+<div class="auth-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="auth-wrapper">
+          <div class="row g-0">
+            <div class="col-md-6 auth-form-container" data-aos="fade-right">
+              <div class="auth-form-content">
+                <div class="auth-form-header">
+                  <h3 class="animate__animated animate__fadeInUp">Create Account</h3>
+                  <p class="animate__animated animate__fadeInUp animate__delay-1s">Join our community and start ordering delicious food today</p>
+                </div>
+                
+                <div *ngIf="errorMessage" class="alert alert-custom animate__animated animate__headShake">
+                  <i class="fas fa-exclamation-circle me-2"></i>
+                  {{ errorMessage }}
+                </div>
+                
+                <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+                  <div class="form-floating mb-3 animate__animated animate__fadeInUp animate__delay-1s">
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="name" 
+                      formControlName="name"
+                      [class.is-invalid]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
+                    <label for="name"><i class="fas fa-user me-2"></i>Full Name</label>
+                    <div class="invalid-feedback" *ngIf="registerForm.get('name')?.errors?.['required'] && registerForm.get('name')?.touched">
+                      Full name is required
+                    </div>
+                  </div>
+                  
+                  <div class="form-floating mb-3 animate__animated animate__fadeInUp animate__delay-1s">
+                    <input 
+                      type="tel" 
+                      class="form-control" 
+                      id="phoneNumber" 
+                      formControlName="phoneNumber"
+                      placeholder="+1234567890"
+                      [class.is-invalid]="registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched">
+                    <label for="phoneNumber"><i class="fas fa-phone-alt me-2"></i>Phone Number</label>
+                    <div class="invalid-feedback" *ngIf="registerForm.get('phoneNumber')?.errors?.['required'] && registerForm.get('phoneNumber')?.touched">
+                      Phone number is required
+                    </div>
+                    <div class="invalid-feedback" *ngIf="registerForm.get('phoneNumber')?.errors?.['pattern'] && registerForm.get('phoneNumber')?.touched">
+                      Please enter a valid phone number (10-14 digits with optional + prefix)
+                    </div>
+                  </div>
+                  
+                  <div class="form-floating mb-3 animate__animated animate__fadeInUp animate__delay-2s">
+                    <input 
+                      type="email" 
+                      class="form-control" 
+                      id="email" 
+                      formControlName="email"
+                      placeholder="name@example.com"
+                      [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+                    <label for="email"><i class="fas fa-envelope me-2"></i>Email Address</label>
+                    <div class="invalid-feedback" *ngIf="registerForm.get('email')?.errors?.['required'] && registerForm.get('email')?.touched">
+                      Email is required
+                    </div>
+                    <div class="invalid-feedback" *ngIf="registerForm.get('email')?.errors?.['email'] && registerForm.get('email')?.touched">
+                      Please enter a valid email address
+                    </div>
+                  </div>
+                  
+                  <div class="form-floating mb-3 animate__animated animate__fadeInUp animate__delay-2s">
+                    <input 
+                      type="password" 
+                      class="form-control" 
+                      id="password" 
+                      formControlName="password"
+                      [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+                    <label for="password"><i class="fas fa-lock me-2"></i>Password</label>
+                    <div class="invalid-feedback" *ngIf="registerForm.get('password')?.errors?.['required'] && registerForm.get('password')?.touched">
+                      Password is required
+                    </div>
+                    <div class="invalid-feedback" *ngIf="registerForm.get('password')?.errors?.['minlength'] && registerForm.get('password')?.touched">
+                      Password must be at least 6 characters
+                    </div>
+                  </div>
+                  
+                  <div class="form-floating mb-3 animate__animated animate__fadeInUp animate__delay-2s">
+                    <input 
+                      type="password" 
+                      class="form-control" 
+                      id="confirmPassword" 
+                      formControlName="confirmPassword"
+                      [class.is-invalid]="(registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['passwordMismatch']) && registerForm.get('confirmPassword')?.touched">
+                    <label for="confirmPassword"><i class="fas fa-lock me-2"></i>Confirm Password</label>
+                    <div class="invalid-feedback" *ngIf="registerForm.get('confirmPassword')?.errors?.['required'] && registerForm.get('confirmPassword')?.touched">
+                      Please confirm your password
+                    </div>
+                    <div class="invalid-feedback" *ngIf="registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched">
+                      Passwords do not match
+                    </div>
+                  </div>
+                  
+                  <div class="form-check mb-4 animate__animated animate__fadeInUp animate__delay-3s">
+                    <input class="form-check-input" type="checkbox" id="acceptTerms">
+                    <label class="form-check-label" for="acceptTerms">
+                      I agree to the <a href="#" class="terms-link">Terms & Conditions</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                    </label>
+                  </div>
+                  
+                  <div class="d-grid gap-2 mb-4 animate__animated animate__fadeInUp animate__delay-3s">
+                    <button 
+                      type="submit" 
+                      class="btn btn-primary btn-lg" 
+                      [disabled]="registerForm.invalid || isSubmitting">
+                      <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      <i *ngIf="!isSubmitting" class="fas fa-user-plus me-2"></i>
+                      Create Account
+                    </button>
+                  </div>
+                </form>
+                
+                <div class="auth-divider animate__animated animate__fadeInUp animate__delay-3s">
+                  <span>or sign up with</span>
+                </div>
+                
+                <div class="social-auth animate__animated animate__fadeInUp animate__delay-3s">
+                  <button class="btn btn-social btn-google">
+                    <i class="fab fa-google"></i>
+                  </button>
+                  <button class="btn btn-social btn-facebook">
+                    <i class="fab fa-facebook-f"></i>
+                  </button>
+                  <button class="btn btn-social btn-apple">
+                    <i class="fab fa-apple"></i>
+                  </button>
+                </div>
+                
+                <div class="auth-footer animate__animated animate__fadeInUp animate__delay-4s">
+                  <p>Already have an account? <a routerLink="/auth/login" class="signin-link">Sign In</a></p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6 auth-banner register-banner" data-aos="fade-left">
+              <div class="auth-banner-content">
+                <div class="auth-logo">
+                  <i class="fas fa-utensils"></i>
+                  <span>FoodieExpress</span>
+                </div>
+                <h2>Join Our Food Community!</h2>
+                <p>Create an account to unlock a world of delicious possibilities at your fingertips.</p>
+                
+                <div class="benefits-list">
+                  <h5>Benefits of joining:</h5>
+                  <ul>
+                    <li>
+                      <i class="fas fa-history"></i>
+                      <div>
+                        <h6>Order History</h6>
+                        <p>Easily reorder your favorite meals</p>
+                      </div>
+                    </li>
+                    <li>
+                      <i class="fas fa-tag"></i>
+                      <div>
+                        <h6>Exclusive Offers</h6>
+                        <p>Get access to members-only deals</p>
+                      </div>
+                    </li>
+                    <li>
+                      <i class="fas fa-star"></i>
+                      <div>
+                        <h6>Save Favorites</h6>
+                        <p>Bookmark your top restaurants</p>
+                      </div>
+                    </li>
+                    <li>
+                      <i class="fas fa-truck"></i>
+                      <div>
+                        <h6>Fast Checkout</h6>
+                        <p>Save delivery details for next time</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                
+                <div class="auth-promo">
+                  <div class="promo-badge">
+                    <span>NEW USERS</span>
+                  </div>
+                  <div class="promo-content">
+                    <h5>Get 20% OFF on your first order!</h5>
+                    <p>Use code: <strong>WELCOME20</strong></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

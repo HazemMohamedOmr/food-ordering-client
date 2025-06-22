@@ -1,0 +1,488 @@
+<!-- Hero Section with Video Background -->
+<section class="hero-section">
+  <div class="hero-overlay"></div>
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6" data-aos="fade-right" data-aos-delay="100">
+        <h1 class="hero-title animate__animated animate__fadeInUp">Delicious Food Delivered 
+          <span class="text-accent">to Your Door</span>
+        </h1>
+        <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-1s">Discover the best restaurants in your area and enjoy a contactless delivery experience</p>
+        <div class="hero-buttons animate__animated animate__fadeInUp animate__delay-1s">
+          <a routerLink="/restaurants" class="btn btn-light btn-lg me-3 px-4 rounded-pill">
+            <i class="fas fa-search me-2"></i> Browse Restaurants
+          </a>
+          <a *ngIf="!authService.isLoggedIn" routerLink="/auth/register" class="btn btn-outline-light btn-lg px-4 rounded-pill">
+            <i class="fas fa-user-plus me-2"></i> Sign Up
+          </a>
+        </div>
+        <div class="hero-stats animate__animated animate__fadeInUp animate__delay-2s">
+          <div class="hero-stat-item">
+            <i class="fas fa-utensils"></i>
+            <div>
+              <span class="count">500+</span>
+              <span class="label">Restaurants</span>
+            </div>
+          </div>
+          <div class="hero-stat-item">
+            <i class="fas fa-biking"></i>
+            <div>
+              <span class="count">30min</span>
+              <span class="label">Avg. Delivery</span>
+            </div>
+          </div>
+          <div class="hero-stat-item">
+            <i class="fas fa-smile"></i>
+            <div>
+              <span class="count">98%</span>
+              <span class="label">Happy Customers</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left" data-aos-delay="300">
+        <div class="hero-image-container">
+          <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1000" alt="Delicious Food" class="img-fluid hero-image">
+          <div class="floating-badge top">
+            <i class="fas fa-star"></i>
+            <span>Top Rated</span>
+          </div>
+          <div class="floating-badge bottom">
+            <i class="fas fa-medal"></i>
+            <span>Premium Quality</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Restaurants Banner -->
+<section class="featured-banner">
+  <div class="container">
+    <div class="banner-wrapper" data-aos="fade-up">
+      <div class="banner-logos">
+        <div class="logo-item">
+          <img src="https://i.imgur.com/8t2KkXx.png" alt="Restaurant Logo">
+        </div>
+        <div class="logo-item">
+          <img src="https://i.imgur.com/YdyHiEH.png" alt="Restaurant Logo">
+        </div>
+        <div class="logo-item">
+          <img src="https://i.imgur.com/j6eIcak.png" alt="Restaurant Logo">
+        </div>
+        <div class="logo-item">
+          <img src="https://i.imgur.com/cJSNhPf.png" alt="Restaurant Logo">
+        </div>
+        <div class="logo-item">
+          <img src="https://i.imgur.com/lYLCimP.png" alt="Restaurant Logo">
+        </div>
+      </div>
+      <p>Trusted by <strong>500+</strong> restaurants nationwide</p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <p class="section-subtitle-badge">SIMPLE & EASY</p>
+      <h2 class="section-title">How It <span class="text-primary">Works</span></h2>
+      <p class="section-subtitle">Order your favorite meal in 3 simple steps</p>
+    </div>
+    
+    <div class="row g-4">
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <div class="step-icon">
+            <i class="fas fa-store"></i>
+          </div>
+          <h3>Choose a Restaurant</h3>
+          <p>Browse through our wide selection of restaurants and cuisines available in your area</p>
+          <div class="step-arrow d-none d-md-block">
+            <i class="fas fa-long-arrow-alt-right"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <div class="step-icon">
+            <i class="fas fa-hamburger"></i>
+          </div>
+          <h3>Select Your Meal</h3>
+          <p>Explore menus and add your favorite dishes to your cart with customization options</p>
+          <div class="step-arrow d-none d-md-block">
+            <i class="fas fa-long-arrow-alt-right"></i>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <div class="step-icon">
+            <i class="fas fa-biking"></i>
+          </div>
+          <h3>Fast Delivery</h3>
+          <p>Get your food delivered to your doorstep in no time with our reliable delivery service</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Popular Dishes Carousel -->
+<section class="popular-dishes">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <p class="section-subtitle-badge">TASTY CHOICES</p>
+      <h2 class="section-title">Popular <span class="text-primary">Dishes</span></h2>
+      <p class="section-subtitle">Explore the most ordered dishes from our top restaurants</p>
+    </div>
+
+    <div class="popular-dishes-slider" data-aos="fade-up" data-aos-delay="100">
+      <div class="swiper-container">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <div class="dish-card">
+              <div class="dish-image">
+                <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=400" alt="Pizza">
+                <div class="dish-tag">Bestseller</div>
+              </div>
+              <div class="dish-info">
+                <h4>Pepperoni Pizza</h4>
+                <div class="dish-rating">
+                  <i class="fas fa-star"></i>
+                  <span>4.8</span>
+                  <span class="dish-reviews">(124 reviews)</span>
+                </div>
+                <div class="dish-meta">
+                  <span><i class="fas fa-fire"></i> Italian</span>
+                  <span><i class="fas fa-clock"></i> 30min</span>
+                </div>
+                <div class="dish-price-action">
+                  <div class="dish-price">$14.99</div>
+                  <a routerLink="/restaurants" class="btn btn-sm btn-primary rounded-pill">Order Now</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="dish-card">
+              <div class="dish-image">
+                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=400" alt="Burger">
+                <div class="dish-tag">Hot</div>
+              </div>
+              <div class="dish-info">
+                <h4>Classic Cheeseburger</h4>
+                <div class="dish-rating">
+                  <i class="fas fa-star"></i>
+                  <span>4.7</span>
+                  <span class="dish-reviews">(98 reviews)</span>
+                </div>
+                <div class="dish-meta">
+                  <span><i class="fas fa-fire"></i> American</span>
+                  <span><i class="fas fa-clock"></i> 25min</span>
+                </div>
+                <div class="dish-price-action">
+                  <div class="dish-price">$12.99</div>
+                  <a routerLink="/restaurants" class="btn btn-sm btn-primary rounded-pill">Order Now</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="dish-card">
+              <div class="dish-image">
+                <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=400" alt="Sushi">
+                <div class="dish-tag">Premium</div>
+              </div>
+              <div class="dish-info">
+                <h4>Sushi Platter</h4>
+                <div class="dish-rating">
+                  <i class="fas fa-star"></i>
+                  <span>4.9</span>
+                  <span class="dish-reviews">(156 reviews)</span>
+                </div>
+                <div class="dish-meta">
+                  <span><i class="fas fa-fire"></i> Japanese</span>
+                  <span><i class="fas fa-clock"></i> 35min</span>
+                </div>
+                <div class="dish-price-action">
+                  <div class="dish-price">$24.99</div>
+                  <a routerLink="/restaurants" class="btn btn-sm btn-primary rounded-pill">Order Now</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="dish-card">
+              <div class="dish-image">
+                <img src="https://images.unsplash.com/photo-1603360946369-dc9bb6258143?q=80&w=400" alt="Pasta">
+                <div class="dish-tag">New</div>
+              </div>
+              <div class="dish-info">
+                <h4>Creamy Pasta Alfredo</h4>
+                <div class="dish-rating">
+                  <i class="fas fa-star"></i>
+                  <span>4.6</span>
+                  <span class="dish-reviews">(87 reviews)</span>
+                </div>
+                <div class="dish-meta">
+                  <span><i class="fas fa-fire"></i> Italian</span>
+                  <span><i class="fas fa-clock"></i> 25min</span>
+                </div>
+                <div class="dish-price-action">
+                  <div class="dish-price">$16.99</div>
+                  <a routerLink="/restaurants" class="btn btn-sm btn-primary rounded-pill">Order Now</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-pagination"></div>
+      </div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Categories -->
+<section class="featured-categories">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <p class="section-subtitle-badge">EXPLORE MORE</p>
+      <h2 class="section-title">Food <span class="text-primary">Categories</span></h2>
+      <p class="section-subtitle">Discover restaurants by cuisine type</p>
+    </div>
+    
+    <div class="row g-4">
+      <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="100">
+        <a routerLink="/restaurants" class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-bacon"></i>
+          </div>
+          <h4>Breakfast</h4>
+          <span class="category-count">42 places</span>
+        </a>
+      </div>
+      
+      <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="200">
+        <a routerLink="/restaurants" class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-coffee"></i>
+          </div>
+          <h4>Coffee</h4>
+          <span class="category-count">37 places</span>
+        </a>
+      </div>
+      
+      <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="300">
+        <a routerLink="/restaurants" class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-pizza-slice"></i>
+          </div>
+          <h4>Pizza</h4>
+          <span class="category-count">65 places</span>
+        </a>
+      </div>
+      
+      <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="400">
+        <a routerLink="/restaurants" class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-fish"></i>
+          </div>
+          <h4>Sushi</h4>
+          <span class="category-count">28 places</span>
+        </a>
+      </div>
+      
+      <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="500">
+        <a routerLink="/restaurants" class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-cocktail"></i>
+          </div>
+          <h4>Drinks</h4>
+          <span class="category-count">43 places</span>
+        </a>
+      </div>
+      
+      <div class="col-6 col-md-4 col-lg-2" data-aos="fade-up" data-aos-delay="600">
+        <a routerLink="/restaurants" class="category-card view-all">
+          <div class="category-icon">
+            <i class="fas fa-th-large"></i>
+          </div>
+          <h4>View All</h4>
+          <span class="category-count">500+ places</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- App Promotion -->
+<section class="app-promo">
+  <div class="container">
+    <div class="app-promo-wrapper" data-aos="fade-up">
+      <div class="row align-items-center">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+          <div class="app-mockup">
+            <img src="https://i.imgur.com/F5LbV9Y.png" alt="Mobile App" class="img-fluid">
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="app-promo-content">
+            <p class="section-subtitle-badge">MOBILE EXPERIENCE</p>
+            <h2 class="section-title">Download Our <span class="text-primary">Mobile App</span></h2>
+            <p class="app-promo-text">Get the best food ordering experience on your mobile device. Order food, track delivery in real-time, and enjoy exclusive app-only offers and discounts.</p>
+            <ul class="app-features">
+              <li><i class="fas fa-check-circle"></i> Fast and secure checkout process</li>
+              <li><i class="fas fa-check-circle"></i> Real-time order tracking</li>
+              <li><i class="fas fa-check-circle"></i> Exclusive app-only offers</li>
+              <li><i class="fas fa-check-circle"></i> Save your favorite restaurants and meals</li>
+            </ul>
+            <div class="app-buttons">
+              <a href="#" class="app-btn apple">
+                <i class="fab fa-apple"></i>
+                <div>
+                  <span>Download on the</span>
+                  <strong>App Store</strong>
+                </div>
+              </a>
+              <a href="#" class="app-btn google">
+                <i class="fab fa-google-play"></i>
+                <div>
+                  <span>Get it on</span>
+                  <strong>Google Play</strong>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials">
+  <div class="container">
+    <div class="text-center mb-5" data-aos="fade-up">
+      <p class="section-subtitle-badge">CUSTOMER STORIES</p>
+      <h2 class="section-title">What Our <span class="text-primary">Customers Say</span></h2>
+      <p class="section-subtitle">Read testimonials from our satisfied customers</p>
+    </div>
+    
+    <div class="testimonials-slider" data-aos="fade-up" data-aos-delay="100">
+      <div class="swiper-container">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <div class="testimonial-card">
+              <div class="testimonial-quote"><i class="fas fa-quote-left"></i></div>
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p class="testimonial-text">The food delivery was super fast and the food was still hot when it arrived. The app is so easy to use and the customer service is excellent. Definitely my go-to food ordering app!</p>
+              <div class="testimonial-author">
+                <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Customer" class="author-image">
+                <div>
+                  <h5>Sarah Johnson</h5>
+                  <p>Regular Customer</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="testimonial-card">
+              <div class="testimonial-quote"><i class="fas fa-quote-left"></i></div>
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p class="testimonial-text">I love the variety of restaurants available. As a busy professional, this app saves me so much time. The delivery is always on time and the food is exactly as described. Highly recommend!</p>
+              <div class="testimonial-author">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Customer" class="author-image">
+                <div>
+                  <h5>Michael Brown</h5>
+                  <p>Food Enthusiast</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="testimonial-card">
+              <div class="testimonial-quote"><i class="fas fa-quote-left"></i></div>
+              <div class="testimonial-rating">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+              <p class="testimonial-text">I've tried many food delivery services and this is by far the best. The app is user-friendly, the selection is great, and the delivery drivers are always polite and professional.</p>
+              <div class="testimonial-author">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Customer" class="author-image">
+                <div>
+                  <h5>Emily Davis</h5>
+                  <p>Busy Professional</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Newsletter Section -->
+<section class="newsletter-section">
+  <div class="container">
+    <div class="newsletter-wrapper" data-aos="fade-up">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h2>Get <span class="text-primary">10% Off</span> Your First Order!</h2>
+          <p>Subscribe to our newsletter and receive exclusive offers, updates, and promotions directly to your inbox.</p>
+        </div>
+        <div class="col-lg-6">
+          <form class="newsletter-form">
+            <div class="input-group">
+              <input type="email" class="form-control" placeholder="Enter your email address">
+              <button class="btn btn-primary" type="submit">Subscribe Now</button>
+            </div>
+            <div class="form-check mt-2">
+              <input class="form-check-input" type="checkbox" id="privacyCheck">
+              <label class="form-check-label" for="privacyCheck">
+                I agree to the <a href="#">Privacy Policy</a>
+              </label>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="container text-center" data-aos="fade-up">
+    <h2 class="cta-title animate__animated animate__fadeInUp">Ready to Order Delicious Food?</h2>
+    <p class="cta-subtitle mb-4 animate__animated animate__fadeInUp animate__delay-1s">Browse our restaurants and place your order now</p>
+    <a routerLink="/restaurants" class="btn btn-light btn-lg rounded-pill animate__animated animate__fadeInUp animate__delay-2s">
+      <i class="fas fa-utensils me-2"></i> Start Ordering
+    </a>
+  </div>
+</section> 

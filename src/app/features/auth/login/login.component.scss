@@ -1,0 +1,7 @@
+/* Login Component Styles */
+@import '../shared/auth.styles.scss';
+
+.auth-banner {
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1496412705862-e0088f16f791?q=80&w=2070') no-repeat center center;
+  background-size: cover;
+} 

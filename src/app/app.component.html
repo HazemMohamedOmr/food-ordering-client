@@ -1,0 +1,135 @@
+<div class="app-container">
+  <header>
+    <nav class="navbar navbar-expand-lg fixed-top" [ngClass]="{'navbar-scrolled shadow-lg': isScrolled, 'navbar-transparent': !isScrolled}">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" routerLink="/">
+          <i class="fas fa-utensils me-2"></i>
+          <span>FoodieExpress</span>
+        </a>
+        <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
+          <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed">
+          <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                <i class="fas fa-home me-1"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/restaurants" routerLinkActive="active">
+                <i class="fas fa-store me-1"></i> Restaurants
+              </a>
+            </li>
+            <li class="nav-item" *ngIf="authService.isLoggedIn">
+              <a class="nav-link" routerLink="/orders" routerLinkActive="active">
+                <i class="fas fa-clipboard-list me-1"></i> My Orders
+              </a>
+            </li>
+            <li class="nav-item" *ngIf="authService.isAdmin">
+              <a class="nav-link" routerLink="/admin" routerLinkActive="active">
+                <i class="fas fa-user-shield me-1"></i> Admin
+              </a>
+            </li>
+          </ul>
+          <div class="navbar-nav">
+            <a class="nav-link position-relative me-3" routerLink="/cart">
+              <i class="fas fa-shopping-cart fs-5"></i>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger animate__animated animate__pulse animate__infinite" *ngIf="cartService.totalItems > 0">
+                {{ cartService.totalItems }}
+              </span>
+            </a>
+            <ng-container *ngIf="!authService.isLoggedIn">
+              <a class="nav-link me-2" routerLink="/auth/login">
+                <i class="fas fa-sign-in-alt me-1"></i> Login
+              </a>
+              <a class="btn btn-sm btn-primary rounded-pill px-3" routerLink="/auth/register">
+                <i class="fas fa-user-plus me-1"></i> Register
+              </a>
+            </ng-container>
+            <ng-container *ngIf="authService.isLoggedIn">
+              <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fas fa-user-circle me-1 fs-5"></i>
+                  {{ authService.currentUser?.name }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="userDropdown">
+                  <li><a class="dropdown-item" routerLink="/profile"><i class="fas fa-user me-2"></i>Profile</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" (click)="authService.logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="bg-dark text-light py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+          <h5 class="text-uppercase mb-4"><i class="fas fa-utensils me-2"></i>FoodieExpress</h5>
+          <p class="mb-3">Delicious food delivered to your doorstep. Order from the best restaurants in town with just a few clicks.</p>
+          <div class="social-icons">
+            <a href="#" class="me-3 text-light fs-5"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="me-3 text-light fs-5"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="me-3 text-light fs-5"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-light fs-5"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+          <h5 class="text-uppercase mb-4">Quick Links</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a routerLink="/" class="text-light text-decoration-none"><i class="fas fa-angle-right me-2"></i>Home</a></li>
+            <li class="mb-2"><a routerLink="/restaurants" class="text-light text-decoration-none"><i class="fas fa-angle-right me-2"></i>Restaurants</a></li>
+            <li class="mb-2"><a routerLink="/auth/register" class="text-light text-decoration-none"><i class="fas fa-angle-right me-2"></i>Register</a></li>
+            <li class="mb-2"><a routerLink="/auth/login" class="text-light text-decoration-none"><i class="fas fa-angle-right me-2"></i>Login</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+          <h5 class="text-uppercase mb-4">Contact Us</h5>
+          <ul class="list-unstyled">
+            <li class="mb-3"><i class="fas fa-map-marker-alt me-2"></i> 123 Foodie Street, Tasty City</li>
+            <li class="mb-3"><i class="fas fa-envelope me-2"></i> support&#64;foodieexpress.com</li>
+            <li class="mb-3"><i class="fas fa-phone me-2"></i> (555) 123-4567</li>
+            <li class="mb-3"><i class="fas fa-clock me-2"></i> Mon-Sun: 8:00 AM - 11:00 PM</li>
+          </ul>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <h5 class="text-uppercase mb-4">Newsletter</h5>
+          <p>Subscribe to get special offers and updates</p>
+          <div class="input-group mb-3">
+            <input type="email" class="form-control" placeholder="Email Address" aria-label="Email Address">
+            <button class="btn btn-primary" type="button"><i class="fas fa-paper-plane"></i></button>
+          </div>
+          <div class="mt-4">
+            <img src="assets/images/payment-methods.png" alt="Payment Methods" class="img-fluid" style="max-height: 30px;">
+          </div>
+        </div>
+      </div>
+      <hr class="my-4">
+      <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+          &copy; {{ currentYear }} FoodieExpress. All rights reserved.
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <a href="#" class="text-light text-decoration-none me-3">Privacy Policy</a>
+          <a href="#" class="text-light text-decoration-none me-3">Terms & Conditions</a>
+          <a href="#" class="text-light text-decoration-none">FAQs</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Back to top button -->
+  <button class="btn btn-primary back-to-top" [ngClass]="{'show': isScrolled}" (click)="scrollToTop()">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+</div>

@@ -1,0 +1,137 @@
+<div class="auth-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="auth-wrapper">
+          <div class="row g-0">
+            <div class="col-md-6 auth-banner" data-aos="fade-right">
+              <div class="auth-banner-content">
+                <div class="auth-logo">
+                  <i class="fas fa-utensils"></i>
+                  <span>FoodieExpress</span>
+                </div>
+                <h2>Welcome Back!</h2>
+                <p>Sign in to continue your food journey and explore delicious meals from your favorite restaurants.</p>
+                <div class="auth-features">
+                  <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Order from 500+ restaurants</span>
+                  </div>
+                  <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Track deliveries in real-time</span>
+                  </div>
+                  <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Get exclusive offers & discounts</span>
+                  </div>
+                </div>
+                <div class="auth-testimonial">
+                  <div class="quote-icon">
+                    <i class="fas fa-quote-left"></i>
+                  </div>
+                  <p>"FoodieExpress has completely transformed how I order food. The service is fast and the app is so easy to use!"</p>
+                  <div class="testimonial-author">
+                    <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Customer">
+                    <div>
+                      <h6>Amanda J.</h6>
+                      <span>Happy Customer</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6 auth-form-container" data-aos="fade-left">
+              <div class="auth-form-content">
+                <div class="auth-form-header">
+                  <h3 class="animate__animated animate__fadeInUp">Sign In</h3>
+                  <p class="animate__animated animate__fadeInUp animate__delay-1s">Enter your credentials to access your account</p>
+                </div>
+                
+                <div *ngIf="errorMessage" class="alert alert-custom animate__animated animate__headShake">
+                  <i class="fas fa-exclamation-circle me-2"></i>
+                  {{ errorMessage }}
+                </div>
+                
+                <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+                  <div class="form-floating mb-3 animate__animated animate__fadeInUp animate__delay-1s">
+                    <input 
+                      type="email" 
+                      class="form-control" 
+                      id="email" 
+                      formControlName="email" 
+                      placeholder="name@example.com"
+                      [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                    <label for="email"><i class="fas fa-envelope me-2"></i>Email address</label>
+                    <div class="invalid-feedback" *ngIf="loginForm.get('email')?.errors?.['required'] && loginForm.get('email')?.touched">
+                      Email is required
+                    </div>
+                    <div class="invalid-feedback" *ngIf="loginForm.get('email')?.errors?.['email'] && loginForm.get('email')?.touched">
+                      Please enter a valid email address
+                    </div>
+                  </div>
+                  
+                  <div class="form-floating mb-3 animate__animated animate__fadeInUp animate__delay-2s">
+                    <input 
+                      type="password" 
+                      class="form-control" 
+                      id="password" 
+                      formControlName="password"
+                      [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                    <label for="password"><i class="fas fa-lock me-2"></i>Password</label>
+                    <div class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.['required'] && loginForm.get('password')?.touched">
+                      Password is required
+                    </div>
+                    <div class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.['minlength'] && loginForm.get('password')?.touched">
+                      Password must be at least 6 characters
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex justify-content-between mb-4 animate__animated animate__fadeInUp animate__delay-2s">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" id="rememberMe">
+                      <label class="form-check-label" for="rememberMe">Remember me</label>
+                    </div>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                  </div>
+                  
+                  <div class="d-grid gap-2 mb-4 animate__animated animate__fadeInUp animate__delay-3s">
+                    <button 
+                      type="submit" 
+                      class="btn btn-primary btn-lg" 
+                      [disabled]="loginForm.invalid || isSubmitting">
+                      <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      <i *ngIf="!isSubmitting" class="fas fa-sign-in-alt me-2"></i>
+                      Sign In
+                    </button>
+                  </div>
+                </form>
+                
+                <div class="auth-divider animate__animated animate__fadeInUp animate__delay-3s">
+                  <span>or continue with</span>
+                </div>
+                
+                <div class="social-auth animate__animated animate__fadeInUp animate__delay-3s">
+                  <button class="btn btn-social btn-google">
+                    <i class="fab fa-google"></i>
+                  </button>
+                  <button class="btn btn-social btn-facebook">
+                    <i class="fab fa-facebook-f"></i>
+                  </button>
+                  <button class="btn btn-social btn-apple">
+                    <i class="fab fa-apple"></i>
+                  </button>
+                </div>
+                
+                <div class="auth-footer animate__animated animate__fadeInUp animate__delay-4s">
+                  <p>Don't have an account? <a routerLink="/auth/register" class="signup-link">Sign Up</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

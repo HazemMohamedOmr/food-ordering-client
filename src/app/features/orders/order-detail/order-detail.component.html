@@ -1,0 +1,106 @@
+<div class="container py-4">
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="isLoading" class="text-center my-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  
+  <div *ngIf="!isLoading && order">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+      <div>
+        <h1>Order Details</h1>
+        <p class="lead mb-1">
+          <span class="badge rounded-pill" [class.bg-success]="isOrderOpen()" [class.bg-secondary]="!isOrderOpen()">
+            {{ isOrderOpen() ? 'Open' : 'Closed' }}
+          </span>
+          <span class="ms-2">{{ order.restaurant?.name }}</span>
+        </p>
+        <p class="text-muted">Order Date: {{ order.orderDate | date:'medium' }}</p>
+      </div>
+      
+      <div *ngIf="isOrderOpen() && (authService.isAdmin || authService.isManager)">
+        <button class="btn btn-danger" (click)="closeOrder()">
+          <i class="bi bi-lock me-2"></i> Close Order
+        </button>
+      </div>
+    </div>
+    
+    <div class="row mb-5">
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">Your Order Items</h5>
+          </div>
+          <div class="card-body">
+            <div *ngIf="myOrderItems.length === 0" class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              You haven't ordered anything yet.
+            </div>
+            
+            <ul class="list-group list-group-flush" *ngIf="myOrderItems.length > 0">
+              @for (item of myOrderItems; track item.id) {
+                <li class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="mb-1">{{ item.menuItem?.name }}</h6>
+                      <p class="text-muted mb-0 small">
+                        {{ item.quantity }} x ${{ item.menuItem?.price?.toFixed(2) ?? '0.00' }}
+                      </p>
+                      <p class="text-muted mb-0 small" *ngIf="item.note">
+                        Note: {{ item.note }}
+                      </p>
+                    </div>
+                    <span class="text-primary">${{ (item.quantity * (item.menuItem?.price || 0)).toFixed(2) }}</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">Order Summary</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal</span>
+              <span>${{ calculateSubtotal().toFixed(2) }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Delivery Fee</span>
+              <span>${{ order.restaurant?.deliveryFee?.toFixed(2) ?? '0.00' }}</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-0 fw-bold">
+              <span>Total</span>
+              <span>${{ calculateTotal().toFixed(2) }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card mt-3 shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">Manager</h5>
+          </div>
+          <div class="card-body">
+            <p class="mb-0"><i class="bi bi-person me-2"></i> {{ order.manager?.name }}</p>
+            <p class="mb-0"><i class="bi bi-envelope me-2"></i> {{ order.manager?.email }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mt-4">
+    <button class="btn btn-secondary" routerLink="/orders">
+      <i class="bi bi-arrow-left me-2"></i> Back to Orders
+    </button>
+  </div>
+</div> 

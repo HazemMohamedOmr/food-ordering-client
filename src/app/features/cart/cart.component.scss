@@ -1,0 +1,36 @@
+/* Cart Component Styles */
+.form-control-sm {
+  font-size: 0.875rem;
+}
+
+.form-floating > .form-control-sm {
+  height: calc(2.5rem + 2px);
+  padding-top: 1rem;
+  padding-bottom: 0.25rem;
+}
+
+.form-floating > label {
+  padding: 0.5rem 0.75rem;
+}
+
+.input-group .form-control:focus {
+  z-index: 0;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.list-group-item {
+  border-left: none;
+  border-right: none;
+}
+
+.list-group-item:first-child {
+  border-top: none;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+} 

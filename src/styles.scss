@@ -1,0 +1,139 @@
+/* You can add global styles to this file, and also import other style files */
+
+// Import Bootstrap and Bootstrap Icons
+@import "bootstrap/scss/bootstrap";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+// Import Font Awesome
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+// Import AOS (Animate on Scroll)
+@import 'aos/dist/aos.css';
+
+// Import Animate.css
+@import 'animate.css';
+
+// Import Swiper
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination"; 
+
+:root {
+  --primary-color: #FF6B6B;
+  --primary-color-rgb: 255, 107, 107;
+  --secondary-color: #4ECDC4;
+  --secondary-color-rgb: 78, 205, 196;
+  --dark-color: #292F36;
+  --light-color: #F7FFF7;
+  --danger-color: #FF6B6B;
+  --success-color: #6ECB63;
+  --warning-color: #FFD166;
+  --info-color: #4ECDC4;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary-color);
+}
+
+// Utility classes
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  &:hover, &:focus {
+    background-color: darken(#ff6b6b, 10%);
+    border-color: darken(#ff6b6b, 10%);
+  }
+}
+
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+.shadow {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+.navbar-dark .navbar-brand {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.card {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.restaurant-card {
+  height: 100%;
+}
+
+.restaurant-card img {
+  height: 200px;
+  object-fit: cover;
+}
+
+.menu-item-card {
+  height: 100%;
+}
+
+.menu-item-card img {
+  height: 150px;
+  object-fit: cover;
+}
+
+footer {
+  margin-top: auto;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(255, 107, 107, 0.25);
+}

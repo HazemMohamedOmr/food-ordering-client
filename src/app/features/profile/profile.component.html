@@ -1,0 +1,81 @@
+<div class="container py-4">
+  <h1 class="mb-4">My Profile</h1>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  
+  <div *ngIf="isLoading" class="text-center my-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  
+  <div *ngIf="!isLoading && user" class="row">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Profile Information</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" class="form-control" id="name" formControlName="name">
+              <div *ngIf="profileForm.get('name')?.invalid && profileForm.get('name')?.touched" class="text-danger small">
+                Name is required
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" formControlName="email">
+              <div *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" class="text-danger small">
+                <span *ngIf="profileForm.get('email')?.errors?.['required']">Email is required</span>
+                <span *ngIf="profileForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="phoneNumber" class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="phoneNumber" formControlName="phoneNumber">
+              <div *ngIf="profileForm.get('phoneNumber')?.invalid && profileForm.get('phoneNumber')?.touched" class="text-danger small">
+                Please enter a valid phone number
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isSaving">
+                <span *ngIf="!isSaving">Save Changes</span>
+                <span *ngIf="isSaving">
+                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Saving...
+                </span>
+              </button>
+              
+              <button type="button" class="btn btn-outline-secondary" (click)="changePassword()">
+                Change Password
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Account Information</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>User ID:</strong> {{ user.id }}</p>
+          <p><strong>Role:</strong> {{ user.role }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
