@@ -5,13 +5,15 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Order, OrderStatus } from '../../../core/models/order.model';
 import { OrderItem } from '../../../core/models/order-item.model';
 import { SharedModule } from '../../../shared/shared.module';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-order-detail',
   templateUrl: './order-detail.component.html',
   styleUrls: ['./order-detail.component.scss'],
   standalone: true,
-  imports: [SharedModule]
+  imports: [SharedModule, FormsModule, CommonModule]
 })
 export class OrderDetailComponent implements OnInit {
   orderId: string;
@@ -19,6 +21,12 @@ export class OrderDetailComponent implements OnInit {
   myOrderItems: OrderItem[] = [];
   isLoading = false;
   errorMessage = '';
+  successMessage = '';
+  
+  // Edit mode for items
+  editingItem: OrderItem | null = null;
+  editQuantity: number = 1;
+  editNote: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -79,6 +87,7 @@ export class OrderDetailComponent implements OnInit {
 
       this.orderService.closeOrder(this.orderId).subscribe({
         next: () => {
+          this.successMessage = 'Order closed successfully';
           // Reload order details after closing
           this.loadOrderDetails();
         },
@@ -92,6 +101,67 @@ export class OrderDetailComponent implements OnInit {
 
   isOrderOpen(): boolean {
     return this.order?.status === OrderStatus.Open;
+  }
+
+  canModifyItems(): boolean {
+    return this.isOrderOpen();
+  }
+  
+  startEditItem(item: OrderItem): void {
+    if (!this.canModifyItems()) return;
+    
+    this.editingItem = item;
+    this.editQuantity = item.quantity;
+    this.editNote = item.note || '';
+  }
+  
+  cancelEdit(): void {
+    this.editingItem = null;
+  }
+  
+  saveItemChanges(): void {
+    if (!this.editingItem || !this.editingItem.id) return;
+    
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    const updatedItem: OrderItem = {
+      ...this.editingItem,
+      quantity: this.editQuantity,
+      note: this.editNote
+    };
+    
+    this.orderService.updateOrderItem(this.editingItem.id, updatedItem).subscribe({
+      next: () => {
+        this.successMessage = 'Item updated successfully';
+        this.editingItem = null;
+        this.loadMyOrderItems();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Failed to update item';
+      }
+    });
+  }
+  
+  deleteItem(item: OrderItem): void {
+    if (!this.canModifyItems() || !item.id) return;
+    
+    if (confirm('Are you sure you want to remove this item from your order?')) {
+      this.isLoading = true;
+      this.errorMessage = '';
+      
+      this.orderService.deleteOrderItem(item.id).subscribe({
+        next: () => {
+          this.successMessage = 'Item removed successfully';
+          this.loadMyOrderItems();
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.errorMessage = error.message || 'Failed to remove item';
+        }
+      });
+    }
   }
 
   calculateSubtotal(): number {

@@ -1,1 +1,17 @@
 /* Admin Dashboard Component Styles */ 
+
+.feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+}
+
+.table {
+  td, th {
+    vertical-align: middle;
+  }
+} 

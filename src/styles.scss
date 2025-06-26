@@ -35,6 +35,12 @@ body {
   font-family: 'Poppins', sans-serif;
   color: #333;
   line-height: 1.6;
+  padding-top: 76px; /* Add padding to account for the fixed header */
+}
+
+// Special padding for pages with hero sections
+body.has-hero-section {
+  padding-top: 0;
 }
 
 // Custom scrollbar

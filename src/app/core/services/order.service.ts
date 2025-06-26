@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Order } from '../models/order.model';
+import { Observable, map } from 'rxjs';
+import { Order, OrderStatus } from '../models/order.model';
 import { environment } from '../../../environments/environment';
 import { OrderItem } from '../models/order-item.model';
 import { PaymentStatus } from '../models/order.model';
@@ -15,10 +15,12 @@ export class OrderService {
   constructor(private http: HttpClient) { }
 
   startOrder(restaurantId: string, managerId: string): Observable<string> {
-    return this.http.post<string>(`${this.apiUrl}/start`, {
+    return this.http.post<any>(`${this.apiUrl}/start`, {
       restaurantId,
       managerId
-    });
+    }).pipe(
+      map(response => response.id || response)
+    );
   }
 
   getById(id: string): Observable<Order> {
@@ -27,6 +29,16 @@ export class OrderService {
 
   getActiveOrders(): Observable<Order[]> {
     return this.http.get<Order[]>(`${this.apiUrl}/active`);
+  }
+
+  getActiveOrderForRestaurant(restaurantId: string): Observable<Order | null> {
+    return this.http.get<Order>(`${this.apiUrl}/active/restaurant/${restaurantId}`);
+  }
+
+  hasActiveOrderForRestaurant(restaurantId: string): Observable<boolean> {
+    return this.getActiveOrderForRestaurant(restaurantId).pipe(
+      map(order => !!order && order.status === OrderStatus.Open)
+    );
   }
 
   getOrderHistory(userId?: string, restaurantId?: string): Observable<Order[]> {
@@ -73,6 +85,10 @@ export class OrderService {
     return this.http.get<OrderItem[]>(`${this.apiUrl}/${orderId}/my-items`);
   }
 
+  getAllOrderItems(orderId: string): Observable<OrderItem[]> {
+    return this.http.get<OrderItem[]>(`${this.apiUrl}/${orderId}/items`);
+  }
+
   addOrderItem(orderItem: OrderItem): Observable<OrderItem> {
     return this.http.post<OrderItem>(`${this.apiUrl}/items`, orderItem);
   }
@@ -83,5 +99,11 @@ export class OrderService {
 
   deleteOrderItem(id: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/items/${id}`);
+  }
+
+  canModifyOrderItem(orderItem: OrderItem, orderId: string): Observable<boolean> {
+    return this.getById(orderId).pipe(
+      map(order => order.status === OrderStatus.Open)
+    );
   }
 } 

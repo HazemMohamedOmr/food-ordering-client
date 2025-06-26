@@ -99,18 +99,28 @@ export class RestaurantService {
     );
   }
 
-  create(restaurant: Restaurant): Observable<Restaurant> {
-    return this.http.post<Restaurant>(this.apiUrl, restaurant).pipe(
-      tap(newRestaurant => {
+  create(restaurant: Restaurant): Observable<string> {
+    return this.http.post<any>(this.apiUrl, restaurant).pipe(
+      map(response => response.data),
+      tap(() => {
         // Update caches
         this.clearCache();
       })
     );
   }
 
-  update(id: string, restaurant: Restaurant): Observable<Restaurant> {
-    return this.http.put<Restaurant>(`${this.apiUrl}/${id}`, restaurant).pipe(
-      tap(updatedRestaurant => {
+  update(id: string, restaurant: Restaurant): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, restaurant).pipe(
+      tap(() => {
+        // Update caches
+        this.clearCache();
+      })
+    );
+  }
+  
+  delete(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
         // Update caches
         this.clearCache();
       })

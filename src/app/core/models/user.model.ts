@@ -7,9 +7,12 @@ export enum UserRole {
 export interface User {
   id?: string;
   name: string;
-  phoneNumber: string;
   email: string;
-  role: UserRole;
+  phoneNumber?: string;
+  role?: UserRole;
+  roleName?: string;
+  createdAt?: Date;
+  token?: string;
 }
 
 export interface UserLogin {

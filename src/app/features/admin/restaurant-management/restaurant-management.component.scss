@@ -1,0 +1,33 @@
+.table-responsive {
+  overflow-x: auto;
+}
+
+.btn-group {
+  .btn {
+    margin-right: 0.25rem;
+    
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+.card-header {
+  background-color: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+  .btn-group {
+    display: flex;
+    flex-direction: column;
+    
+    .btn {
+      margin-right: 0;
+      margin-bottom: 0.25rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+} 

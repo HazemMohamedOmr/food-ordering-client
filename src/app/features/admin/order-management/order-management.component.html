@@ -1,0 +1,280 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Order Management</h1>
+  </div>
+
+  <!-- Alert messages -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  </div>
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center my-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div *ngIf="orderToClose" class="confirmation-modal-overlay">
+    <div class="confirmation-modal">
+      <div class="modal-header">
+        <h4 class="modal-title">Confirm Order Closure</h4>
+        <button type="button" class="btn-close" (click)="cancelCloseOrder()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Are you sure you want to close this order?
+        </div>
+        <p>This will finalize the order and prevent any further modifications.</p>
+        <div class="order-info mt-3">
+          <p><strong>Order ID:</strong> {{ orderToClose.id }}</p>
+          <p><strong>Restaurant:</strong> {{ orderToClose.restaurant?.name || 'N/A' }}</p>
+          <p><strong>Date:</strong> {{ formatDate(orderToClose.orderDate) }}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelCloseOrder()">Cancel</button>
+        <button type="button" class="btn btn-danger" [disabled]="isProcessingClose" (click)="confirmCloseOrder()">
+          <span *ngIf="isProcessingClose" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Close Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div *ngIf="selectedOrder" class="order-details-overlay">
+    <div class="order-details-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          Order Details 
+          <span class="badge ms-2" [ngClass]="getOrderStatusClass(selectedOrder.status)">
+            {{ getOrderStatusName(selectedOrder.status) }}
+          </span>
+        </h2>
+        <button type="button" class="btn-close" (click)="clearSelectedOrder()"></button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Loading indicator for details -->
+        <div *ngIf="isLoadingDetails" class="d-flex justify-content-center my-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading details...</span>
+          </div>
+        </div>
+        
+        <div *ngIf="!isLoadingDetails">
+          <div class="order-info mb-4">
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Order ID:</strong> {{ selectedOrder.id }}</p>
+                <p><strong>Restaurant:</strong> {{ selectedOrder.restaurant?.name || 'N/A' }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Date:</strong> {{ formatDate(selectedOrder.orderDate) }}</p>
+                <p *ngIf="selectedOrder.status === OrderStatus.Closed">
+                  <strong>Closed At:</strong> {{ formatDate(selectedOrder.closedAt) }}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Order Items Grouped By User -->
+          <h3 class="mb-3">Order Items by User</h3>
+          
+          <div *ngIf="selectedOrder.userItems && Object.keys(selectedOrder.userItems).length > 0; else noItems">
+            <div class="user-order-section mb-4" *ngFor="let userId of Object.keys(selectedOrder.userItems)">
+              <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h4 class="mb-0">{{ selectedOrder.userItems[userId].userName }}</h4>
+                  <div>
+                    <span class="badge me-2" [ngClass]="selectedOrder.userItems[userId].isPaid ? 'bg-success' : 'bg-danger'">
+                      {{ selectedOrder.userItems[userId].isPaid ? 'Paid' : 'Unpaid' }}
+                    </span>
+                    <button *ngIf="selectedOrder.status === OrderStatus.Closed && !selectedOrder.userItems[userId].isPaid"
+                            class="btn btn-sm btn-success"
+                            [disabled]="processingPayment"
+                            (click)="updatePaymentStatus(selectedOrder.id!, userId, PaymentStatus.Paid)">
+                      <i class="fas fa-check me-1"></i> Mark as Paid
+                    </button>
+                    <button *ngIf="selectedOrder.status === OrderStatus.Closed && selectedOrder.userItems[userId].isPaid"
+                            class="btn btn-sm btn-warning"
+                            [disabled]="processingPayment"
+                            (click)="updatePaymentStatus(selectedOrder.id!, userId, PaymentStatus.Unpaid)">
+                      <i class="fas fa-times me-1"></i> Mark as Unpaid
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Item</th>
+                          <th>Price</th>
+                          <th>Quantity</th>
+                          <th>Total</th>
+                          <th>Note</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of selectedOrder.userItems[userId].items">
+                          <td>{{ item.menuItem?.name || 'Unknown Item' }}</td>
+                          <td>${{ item.menuItem?.price?.toFixed(2) || '0.00' }}</td>
+                          <td>{{ item.quantity }}</td>
+                          <td>${{ (item.menuItem?.price || 0) * item.quantity | number:'1.2-2' }}</td>
+                          <td>{{ item.note || '-' }}</td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th colspan="3" class="text-end">Subtotal:</th>
+                          <th>${{ selectedOrder.userItems[userId].totalAmount.toFixed(2) }}</th>
+                          <th></th>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="card mt-4">
+              <div class="card-header">
+                <h4 class="mb-0">Order Summary</h4>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6 offset-md-6">
+                    <table class="table">
+                      <tbody>
+                        <tr>
+                          <th>Total Amount:</th>
+                          <td class="text-end">${{ selectedOrder.totalAmount?.toFixed(2) }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <ng-template #noItems>
+            <div class="alert alert-info">
+              No items found for this order.
+            </div>
+          </ng-template>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="clearSelectedOrder()">Close</button>
+        <button *ngIf="selectedOrder.status === OrderStatus.Open" 
+                type="button" 
+                class="btn btn-danger" 
+                (click)="showCloseOrderConfirmation(selectedOrder)">
+          Close Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading">
+    <!-- Active Orders Section -->
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h2 class="mb-0">Active Orders</h2>
+      </div>
+      <div class="card-body">
+        <div *ngIf="activeOrders.length === 0" class="alert alert-info">
+          No active orders found.
+        </div>
+        
+        <div class="table-responsive" *ngIf="activeOrders.length > 0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Restaurant</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of activeOrders">
+                <td>{{ order.id }}</td>
+                <td>{{ order.restaurant?.name || 'N/A' }}</td>
+                <td>{{ formatDate(order.orderDate) }}</td>
+                <td>
+                  <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-primary" (click)="viewOrderDetails(order)">
+                      <i class="fas fa-eye me-1"></i> View Details
+                    </button>
+                    <button class="btn btn-sm btn-danger" (click)="showCloseOrderConfirmation(order)">
+                      <i class="fas fa-times-circle me-1"></i> Close Order
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order History Section -->
+    <div class="card">
+      <div class="card-header bg-secondary text-white">
+        <h2 class="mb-0">Order History</h2>
+      </div>
+      <div class="card-body">
+        <div *ngIf="orderHistory.length === 0" class="alert alert-info">
+          No order history found.
+        </div>
+        
+        <div class="table-responsive" *ngIf="orderHistory.length > 0">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Restaurant</th>
+                <th>Date</th>
+                <th>Closed At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orderHistory">
+                <td>{{ order.id }}</td>
+                <td>{{ order.restaurant?.name || 'N/A' }}</td>
+                <td>{{ formatDate(order.orderDate) }}</td>
+                <td>{{ formatDate(order.closedAt) }}</td>
+                <td>
+                  <button class="btn btn-sm btn-primary" (click)="viewOrderDetails(order)">
+                    <i class="fas fa-eye me-1"></i> View Details
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a routerLink="/admin" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+    </a>
+  </div>
+</div> 

@@ -10,7 +10,8 @@ import { SharedModule } from '../../../shared/shared.module';
 import { CartService } from '../../../core/services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, finalize, forkJoin } from 'rxjs';
+import { Subject, takeUntil, finalize, forkJoin, of } from 'rxjs';
+import { OrderStatus } from '../../../core/models/order.model';
 
 interface MenuItemViewModel extends MenuItem {
   isPopular?: boolean;
@@ -38,8 +39,11 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   menuItems: MenuItemViewModel[] = [];
   isLoading = false;
   errorMessage = '';
+  successMessage = '';
   isFavorite = false;
   itemQuantities: { [id: string]: number } = {};
+  hasActiveOrder = false;
+  activeOrderId: string | null = null;
   
   // Track subscriptions for cleanup
   private destroy$ = new Subject<void>();
@@ -92,6 +96,7 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
     }
 
     this.loadRestaurantDetails();
+    this.checkActiveOrder();
   }
   
   ngOnDestroy(): void {
@@ -133,6 +138,35 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  checkActiveOrder(): void {
+    if (!this.restaurantId) return;
+    
+    this.orderService.getActiveOrderForRestaurant(this.restaurantId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (order) => {
+          if (order && order.id) {
+            this.hasActiveOrder = order.status === OrderStatus.Open;
+            this.activeOrderId = order.id;
+            
+            // If there's an active order, set it in the cart service
+            if (this.hasActiveOrder) {
+              this.cartService.setRestaurant(this.restaurantId).subscribe();
+            }
+          } else {
+            this.hasActiveOrder = false;
+            this.activeOrderId = null;
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.hasActiveOrder = false;
+          this.activeOrderId = null;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
   initializeQuantities(): void {
     this.menuItems.forEach(item => {
       if (item.id && !this.itemQuantities[item.id]) {
@@ -160,10 +194,39 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (orderId) => {
-          this.router.navigate(['/orders', orderId]);
+          this.successMessage = 'Order started successfully! Users can now add items to their cart.';
+          this.activeOrderId = orderId;
+          this.hasActiveOrder = true;
+          this.checkActiveOrder(); // Refresh the active order status
+          this.cdr.markForCheck();
         },
         error: (error) => {
           this.errorMessage = error.message || 'Failed to start order';
+          this.cdr.markForCheck();
+        }
+      });
+  }
+  
+  closeOrder(): void {
+    if (!this.activeOrderId) return;
+    
+    if (!this.authService.isManager && !this.authService.isAdmin) {
+      this.errorMessage = 'Only restaurant managers or admins can close orders';
+      this.cdr.markForCheck();
+      return;
+    }
+    
+    this.orderService.closeOrder(this.activeOrderId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Order closed successfully! Users can no longer add items to their cart.';
+          this.hasActiveOrder = false;
+          this.activeOrderId = null;
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          this.errorMessage = error.message || 'Failed to close order';
           this.cdr.markForCheck();
         }
       });
@@ -198,12 +261,27 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   addToCart(item: MenuItem): void {
     if (!this.restaurantId) return;
     
-    const quantity = item.id ? this.itemQuantities[item.id] || 1 : 1;
-    this.cartService.setRestaurant(this.restaurantId);
-    this.cartService.addToCart(item, quantity);
+    if (!this.hasActiveOrder) {
+      this.errorMessage = 'There is no active order for this restaurant. Please wait for the manager to start an order.';
+      this.cdr.markForCheck();
+      return;
+    }
     
-    // Show a success message or toast notification
-    alert(`${quantity} ${item.name}${quantity > 1 ? 's' : ''} added to cart!`);
+    const quantity = item.id ? this.itemQuantities[item.id] || 1 : 1;
+    
+    // Try to add to cart
+    const success = this.cartService.addToCart(item, quantity);
+    
+    if (success) {
+      // Show a success message or toast notification
+      this.successMessage = `${quantity} ${item.name}${quantity > 1 ? 's' : ''} added to cart!`;
+      this.errorMessage = '';
+    } else {
+      this.errorMessage = 'Failed to add item to cart. Please try again.';
+      this.successMessage = '';
+    }
+    
+    this.cdr.markForCheck();
   }
   
   // Helper methods for UI
@@ -249,30 +327,34 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   }
   
   getDummyReviews(): ReviewViewModel[] {
-    // Generate 3-5 random reviews
-    const numReviews = 3 + Math.floor(Math.random() * 3); // 3, 4, or 5 reviews
+    // Generate 3-5 dummy reviews
+    const numReviews = 3 + Math.floor(Math.random() * 3);
     const reviews: ReviewViewModel[] = [];
     
-    const names = ['John D.', 'Sarah M.', 'Michael T.', 'Emily R.', 'David K.', 'Jessica L.'];
+    const names = ['John D.', 'Sarah M.', 'Michael R.', 'Emily L.', 'David S.', 'Jessica T.', 'Robert K.'];
     const comments = [
-      'Great food and excellent service! Will definitely come back again.',
-      'The food was delicious but the service could be a bit faster.',
-      'Amazing flavors and very reasonable prices. Highly recommended!',
-      'Nice atmosphere but the food was just okay. Might try again.',
-      'Outstanding dining experience from start to finish!'
+      'Great food and excellent service!',
+      'The atmosphere was nice but the food was just okay.',
+      'Absolutely loved everything about this place!',
+      'Good value for money, will definitely come back.',
+      'Service was a bit slow but the food made up for it.',
+      'Best restaurant in town, highly recommend the specials!',
+      'Decent place for a quick meal, nothing extraordinary.'
     ];
     
     for (let i = 0; i < numReviews; i++) {
-      const randomDay = 1 + Math.floor(Math.random() * 28);
-      const randomMonth = 1 + Math.floor(Math.random() * 12);
-      const review: ReviewViewModel = {
-        name: names[Math.floor(Math.random() * names.length)],
-        avatarId: (i + 1).toString(),
-        rating: 3 + Math.floor(Math.random() * 3), // Rating between 3-5
-        date: `${randomMonth}/${randomDay}/2023`,
-        comment: comments[Math.floor(Math.random() * comments.length)]
-      };
-      reviews.push(review);
+      const randomNameIndex = Math.floor(Math.random() * names.length);
+      const randomCommentIndex = Math.floor(Math.random() * comments.length);
+      const randomRating = 3 + Math.floor(Math.random() * 3); // 3-5 stars
+      const randomDaysAgo = Math.floor(Math.random() * 30) + 1; // 1-30 days ago
+      
+      reviews.push({
+        name: names[randomNameIndex],
+        avatarId: String(Math.floor(Math.random() * 100)),
+        rating: randomRating,
+        date: `${randomDaysAgo} days ago`,
+        comment: comments[randomCommentIndex]
+      });
     }
     
     return reviews;

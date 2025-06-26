@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -8,7 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RestaurantService } from '../../core/services/restaurant.service';
 import { Restaurant } from '../../core/models/restaurant.model';
 import { Order } from '../../core/models/order.model';
-import { forkJoin, lastValueFrom } from 'rxjs';
+import { forkJoin, lastValueFrom, Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-cart',
@@ -17,12 +17,15 @@ import { forkJoin, lastValueFrom } from 'rxjs';
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.scss']
 })
-export class CartComponent implements OnInit {
+export class CartComponent implements OnInit, OnDestroy {
   cartItems: CartItem[] = [];
   restaurant: Restaurant | null = null;
   isLoading = false;
   isSubmitting = false;
   errorMessage = '';
+  activeOrderId: string | null = null;
+  
+  private destroy$ = new Subject<void>();
 
   constructor(
     public cartService: CartService,
@@ -33,11 +36,20 @@ export class CartComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cartService.items$.subscribe(items => {
+    this.cartService.items$.pipe(takeUntil(this.destroy$)).subscribe(items => {
       this.cartItems = items;
+    });
+    
+    this.cartService.activeOrderId$.pipe(takeUntil(this.destroy$)).subscribe(id => {
+      this.activeOrderId = id;
     });
 
     this.loadRestaurantDetails();
+  }
+  
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadRestaurantDetails(): void {
@@ -102,16 +114,19 @@ export class CartComponent implements OnInit {
       this.isSubmitting = false;
       return;
     }
-
-    const orderItems = this.cartService.toOrderItems();
     
+    if (!this.activeOrderId) {
+      this.errorMessage = 'No active order found for this restaurant';
+      this.isSubmitting = false;
+      return;
+    }
+
     try {
-      // Since createOrder doesn't exist, we'll use startOrder and then add items
-      const orderId = await lastValueFrom(this.orderService.startOrder(restaurantId, this.authService.currentUser?.id || ''));
+      // Use the active order ID to add items
+      const orderItems = this.cartService.toOrderItems(this.activeOrderId);
       
-      // Add each order item
+      // Add each order item to the existing active order
       const observables = orderItems.map(item => {
-        item.orderId = orderId;
         return this.orderService.addOrderItem(item);
       });
       
@@ -119,10 +134,10 @@ export class CartComponent implements OnInit {
       
       this.isSubmitting = false;
       this.cartService.clearCart();
-      this.router.navigate(['/orders', orderId]);
+      this.router.navigate(['/orders', this.activeOrderId]);
     } catch (error: any) {
-      console.error('Error creating order', error);
-      this.errorMessage = 'Failed to create order. Please try again.';
+      console.error('Error adding items to order', error);
+      this.errorMessage = 'Failed to add items to order. Please try again.';
       this.isSubmitting = false;
     }
   }

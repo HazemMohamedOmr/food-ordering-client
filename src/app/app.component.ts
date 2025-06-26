@@ -1,10 +1,11 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { RouterOutlet, Router } from '@angular/router';
+import { Component, OnInit, HostListener, Renderer2 } from '@angular/core';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
 import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { CartService } from './core/services/cart.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -21,11 +22,13 @@ export class AppComponent implements OnInit {
   constructor(
     public authService: AuthService,
     public cartService: CartService,
-    private router: Router
+    private router: Router,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
     this.checkScroll();
+    
     // Initialize AOS (Animate On Scroll)
     if (typeof window !== 'undefined') {
       import('aos').then(aos => {
@@ -36,8 +39,26 @@ export class AppComponent implements OnInit {
         });
       });
     }
+    
+    // Set initial body class
+    this.updateBodyClass();
+    
+    // Listen for route changes to update body class
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.updateBodyClass();
+    });
   }
 
+  private updateBodyClass(): void {
+    if (this.isHomePage()) {
+      this.renderer.addClass(document.body, 'has-hero-section');
+    } else {
+      this.renderer.removeClass(document.body, 'has-hero-section');
+    }
+  }
+  
   @HostListener('window:scroll', [])
   checkScroll() {
     this.isScrolled = window.pageYOffset > 100;

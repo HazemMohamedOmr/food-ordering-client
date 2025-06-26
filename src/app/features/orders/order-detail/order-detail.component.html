@@ -1,6 +1,12 @@
 <div class="container py-4">
-  <div *ngIf="errorMessage" class="alert alert-danger">
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show">
     {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  </div>
+  
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
+    {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''"></button>
   </div>
   
   <div *ngIf="isLoading" class="text-center my-5">
@@ -20,6 +26,12 @@
           <span class="ms-2">{{ order.restaurant?.name }}</span>
         </p>
         <p class="text-muted">Order Date: {{ order.orderDate | date:'medium' }}</p>
+        <p *ngIf="isOrderOpen()" class="text-success">
+          <i class="bi bi-info-circle me-2"></i> You can modify your order items while the order is open.
+        </p>
+        <p *ngIf="!isOrderOpen() && order.closedAt" class="text-muted">
+          <i class="bi bi-lock me-2"></i> Order closed at: {{ order.closedAt | date:'medium' }}
+        </p>
       </div>
       
       <div *ngIf="isOrderOpen() && (authService.isAdmin || authService.isManager)">
@@ -44,7 +56,8 @@
             <ul class="list-group list-group-flush" *ngIf="myOrderItems.length > 0">
               @for (item of myOrderItems; track item.id) {
                 <li class="list-group-item">
-                  <div class="d-flex justify-content-between align-items-center">
+                  <!-- Normal view mode -->
+                  <div *ngIf="editingItem?.id !== item.id" class="d-flex justify-content-between align-items-center">
                     <div>
                       <h6 class="mb-1">{{ item.menuItem?.name }}</h6>
                       <p class="text-muted mb-0 small">
@@ -54,7 +67,33 @@
                         Note: {{ item.note }}
                       </p>
                     </div>
-                    <span class="text-primary">${{ (item.quantity * (item.menuItem?.price || 0)).toFixed(2) }}</span>
+                    <div>
+                      <span class="text-primary me-3">${{ (item.quantity * (item.menuItem?.price || 0)).toFixed(2) }}</span>
+                      <div class="btn-group btn-group-sm" *ngIf="canModifyItems()">
+                        <button class="btn btn-outline-primary" (click)="startEditItem(item)">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" (click)="deleteItem(item)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Edit mode -->
+                  <div *ngIf="editingItem?.id === item.id" class="edit-item-form">
+                    <div class="mb-3">
+                      <label for="editQuantity" class="form-label">Quantity</label>
+                      <input type="number" class="form-control" id="editQuantity" [(ngModel)]="editQuantity" min="1" max="10">
+                    </div>
+                    <div class="mb-3">
+                      <label for="editNote" class="form-label">Special Instructions</label>
+                      <textarea class="form-control" id="editNote" [(ngModel)]="editNote" rows="2"></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                      <button class="btn btn-secondary me-2" (click)="cancelEdit()">Cancel</button>
+                      <button class="btn btn-primary" (click)="saveItemChanges()">Save Changes</button>
+                    </div>
                   </div>
                 </li>
               }

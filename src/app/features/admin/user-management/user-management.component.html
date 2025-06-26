@@ -1,0 +1,98 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>User Management</h1>
+    <button class="btn btn-primary" routerLink="/admin">
+      <i class="fas fa-arrow-left me-2"></i> Back to Dashboard
+    </button>
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  
+  <div *ngIf="isLoading" class="text-center my-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div class="card mb-5">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-users me-2"></i> System Users</h5>
+        <button class="btn btn-sm btn-light" (click)="loadUsers()">
+          <i class="fas fa-sync-alt me-2"></i> Refresh
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="users.length === 0 && !isLoading">
+              <td colspan="6" class="text-center">No users found</td>
+            </tr>
+            <tr *ngFor="let user of users">
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.phoneNumber || 'N/A' }}</td>
+              <td>
+                <span class="badge" 
+                    [ngClass]="{
+                      'bg-danger': user.role === UserRole.Admin, 
+                      'bg-primary': user.role === UserRole.Manager,
+                      'bg-secondary': user.role === UserRole.EndUser
+                    }">
+                  {{ getRoleName(user.role || UserRole.EndUser) }}
+                </span>
+              </td>
+              <td>{{ user.createdAt ? (user.createdAt | date:'medium') : 'N/A' }}</td>
+              <td>
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Change Role
+                  </button>
+                  <ul class="dropdown-menu">
+                    <!-- No option to promote to admin -->
+                    <li>
+                      <button class="dropdown-item" 
+                              [disabled]="user.role === UserRole.Manager || user.id === authService.currentUser?.id"
+                              (click)="updateUserRole(user, UserRole.Manager)">
+                        Promote to Manager
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dropdown-item"
+                              [disabled]="user.role === UserRole.EndUser || user.id === authService.currentUser?.id"
+                              (click)="updateUserRole(user, UserRole.EndUser)">
+                        Demote to User
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mb-5 pb-5">
+    <!-- Extra padding at the bottom -->
+  </div>
+</div> 

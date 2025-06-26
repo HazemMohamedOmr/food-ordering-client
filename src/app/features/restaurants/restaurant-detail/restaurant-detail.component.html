@@ -1,7 +1,14 @@
 <div class="restaurant-detail-container">
   <!-- Error Message -->
-  <div *ngIf="errorMessage" class="alert alert-custom">
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show">
     <i class="fas fa-exclamation-circle me-2"></i> {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+  </div>
+  
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
+    <i class="fas fa-check-circle me-2"></i> {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''"></button>
   </div>
   
   <!-- Loading Spinner -->
@@ -45,7 +52,17 @@
             </div>
             
             <div class="restaurant-actions" *ngIf="authService.isLoggedIn">
-              <button class="btn btn-primary btn-action" (click)="startOrder()" *ngIf="authService.isManager || authService.isAdmin">
+              <!-- Order Status Banner -->
+              <div class="order-status-banner mb-3" *ngIf="hasActiveOrder">
+                <div class="alert alert-success">
+                  <i class="fas fa-check-circle me-2"></i> Active order in progress! Users can add items to their cart.
+                  <button *ngIf="authService.isManager || authService.isAdmin" class="btn btn-sm btn-danger ms-3" (click)="closeOrder()">
+                    <i class="fas fa-times-circle me-1"></i> Close Order
+                  </button>
+                </div>
+              </div>
+              
+              <button class="btn btn-primary btn-action" (click)="startOrder()" *ngIf="(authService.isManager || authService.isAdmin) && !hasActiveOrder">
                 <i class="fas fa-plus-circle me-2"></i> Start New Order
               </button>
               <button class="btn btn-outline-light btn-action" (click)="toggleFavorite()">
@@ -140,6 +157,14 @@
         </div>
         
         <div class="row">
+          <!-- Order Status Notice for Users -->
+          <div class="col-12 mb-4" *ngIf="!hasActiveOrder">
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle me-2"></i> 
+              There is no active order for this restaurant. Please wait for a manager to start an order before adding items to your cart.
+            </div>
+          </div>
+          
           @for (item of menuItems; track trackByMenuItem($index, item)) {
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="menu-item-card">
@@ -162,7 +187,7 @@
                       <span class="quantity">{{ getItemQuantity(item) }}</span>
                       <button class="btn-quantity" (click)="increaseQuantity(item)">+</button>
                     </div>
-                    <button class="btn btn-primary btn-add-cart" (click)="addToCart(item)">
+                    <button class="btn btn-primary btn-add-cart" [disabled]="!hasActiveOrder" (click)="addToCart(item)">
                       <i class="fas fa-cart-plus me-2"></i> Add
                     </button>
                   </div>

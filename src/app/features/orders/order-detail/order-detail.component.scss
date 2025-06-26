@@ -1,1 +1,36 @@
 /* Order Detail Component Styles */ 
+.edit-item-form {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.btn-group-sm {
+  .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+.list-group-item {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.badge {
+  padding: 0.5rem 0.75rem;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+  }
+} 

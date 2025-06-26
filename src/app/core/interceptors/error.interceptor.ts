@@ -1,32 +1,20 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse
-} from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
-@Injectable()
-export class ErrorInterceptor implements HttpInterceptor {
-
-  constructor(private authService: AuthService) {}
-
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          // Auto logout if 401 response returned from API
-          this.authService.logout();
-        }
-        
-        // Get the error message from the server or use generic message
-        const errorMessage = error.error?.message || error.error?.errors || error.statusText || 'Unknown error occurred';
-        return throwError(() => new Error(errorMessage));
-      })
-    );
-  }
-} 
+export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  
+  return next(req).pipe(
+    catchError(error => {
+      if (error.status === 401) {
+        // Auto logout if 401 response returned from api
+        authService.logout();
+      }
+      
+      const errorMessage = error.error?.message || error.statusText || 'Unknown error';
+      return throwError(() => new Error(errorMessage));
+    })
+  );
+}; 

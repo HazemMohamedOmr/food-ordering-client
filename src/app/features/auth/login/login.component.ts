@@ -1,21 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { SharedModule } from '../../../shared/shared.module';
+import { UserLogin } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [SharedModule]
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   loginForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
-
+  
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -25,33 +26,39 @@ export class LoginComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+    
+    // Debug: Check if user is already logged in
+    console.log('Current user:', this.authService.currentUser);
+    console.log('Is logged in:', this.authService.isLoggedIn);
+    console.log('Token:', this.authService.token);
   }
-
-  ngOnInit(): void {
-    // If already logged in, redirect to home
-    if (this.authService.isLoggedIn) {
-      this.router.navigate(['/']);
-    }
-  }
-
+  
   onSubmit(): void {
     if (this.loginForm.invalid) {
       return;
     }
-
+    
     this.isSubmitting = true;
     this.errorMessage = '';
-
-    const credentials = this.loginForm.value;
-
+    
+    const credentials: UserLogin = {
+      email: this.loginForm.value.email,
+      password: this.loginForm.value.password
+    };
+    
     this.authService.login(credentials).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Login successful:', response);
+        console.log('Token stored:', this.authService.token);
+        console.log('Current user after login:', this.authService.currentUser);
+        
         this.isSubmitting = false;
         this.router.navigate(['/']);
       },
       error: (error) => {
+        console.error('Login error:', error);
         this.isSubmitting = false;
-        this.errorMessage = error.message || 'Login failed. Please check your credentials.';
+        this.errorMessage = error.message || 'Failed to login. Please check your credentials.';
       }
     });
   }

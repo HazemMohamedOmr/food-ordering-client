@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map, shareReplay, tap } from 'rxjs';
 import { MenuItem } from '../models/menu-item.model';
 import { environment } from '../../../environments/environment';
 
@@ -16,23 +16,27 @@ export class MenuItemService {
     return this.http.get<MenuItem[]>(this.apiUrl);
   }
 
+  getByRestaurant(restaurantId: string): Observable<MenuItem[]> {
+    return this.http.get<MenuItem[]>(`${this.apiUrl}/restaurant/${restaurantId}`).pipe(
+      shareReplay(1)
+    );
+  }
+
   getById(id: string): Observable<MenuItem> {
     return this.http.get<MenuItem>(`${this.apiUrl}/${id}`);
   }
 
-  getByRestaurant(restaurantId: string): Observable<MenuItem[]> {
-    return this.http.get<MenuItem[]>(`${this.apiUrl}/restaurant/${restaurantId}`);
+  create(menuItem: MenuItem): Observable<string> {
+    return this.http.post<any>(this.apiUrl, menuItem).pipe(
+      map(response => response.data)
+    );
   }
 
-  create(menuItem: MenuItem): Observable<MenuItem> {
-    return this.http.post<MenuItem>(this.apiUrl, menuItem);
+  update(id: string, menuItem: MenuItem): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, menuItem);
   }
 
-  update(id: string, menuItem: MenuItem): Observable<MenuItem> {
-    return this.http.put<MenuItem>(`${this.apiUrl}/${id}`, menuItem);
-  }
-
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  delete(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 } 
