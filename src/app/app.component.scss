@@ -136,6 +136,23 @@ footer .text-center {
   }
 }
 
+.navbar-light {
+  background-color: #fff;
+  
+  .navbar-brand {
+    color: var(--primary-color);
+  }
+  
+  .nav-link {
+    color: var(--dark-color);
+  }
+  
+  .navbar-toggler {
+    color: var(--dark-color);
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+}
+
 .navbar-scrolled {
   background-color: white;
   padding: 10px 0;

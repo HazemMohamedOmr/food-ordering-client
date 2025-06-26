@@ -1,5 +1,5 @@
 import { Component, OnInit, HostListener } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
 import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
@@ -20,7 +20,8 @@ export class AppComponent implements OnInit {
   
   constructor(
     public authService: AuthService,
-    public cartService: CartService
+    public cartService: CartService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -44,5 +45,13 @@ export class AppComponent implements OnInit {
 
   scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  // Check if the current page is home or restaurant pages
+  isHomePage(): boolean {
+    const currentUrl = this.router.url;
+    return currentUrl === '/' || 
+           currentUrl === '/home' || 
+           currentUrl.startsWith('/restaurants');
   }
 }
