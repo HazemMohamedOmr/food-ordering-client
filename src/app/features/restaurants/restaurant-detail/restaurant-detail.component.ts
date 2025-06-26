@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RestaurantService } from '../../../core/services/restaurant.service';
 import { MenuItemService } from '../../../core/services/menu-item.service';
@@ -10,6 +10,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { CartService } from '../../../core/services/cart.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Subject, takeUntil, finalize, forkJoin } from 'rxjs';
 
 interface MenuItemViewModel extends MenuItem {
   isPopular?: boolean;
@@ -28,7 +29,8 @@ interface ReviewViewModel {
   templateUrl: './restaurant-detail.component.html',
   styleUrls: ['./restaurant-detail.component.scss'],
   standalone: true,
-  imports: [SharedModule, FormsModule, CommonModule]
+  imports: [SharedModule, FormsModule, CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RestaurantDetailComponent implements OnInit, OnDestroy {
   restaurantId: string;
@@ -38,7 +40,9 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   errorMessage = '';
   isFavorite = false;
   itemQuantities: { [id: string]: number } = {};
-  aosInitialized = false;
+  
+  // Track subscriptions for cleanup
+  private destroy$ = new Subject<void>();
   
   // Cached values
   restaurantRating = '';
@@ -68,7 +72,8 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
     private menuItemService: MenuItemService,
     private orderService: OrderService,
     public authService: AuthService,
-    public cartService: CartService
+    public cartService: CartService,
+    private cdr: ChangeDetectorRef
   ) {
     this.restaurantId = this.route.snapshot.paramMap.get('id') || '';
     
@@ -90,62 +95,48 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   }
   
   ngOnDestroy(): void {
-    // Clean up any subscriptions or resources
-  }
-  
-  initializeAOS(): void {
-    if (typeof window !== 'undefined' && !this.aosInitialized) {
-      this.aosInitialized = true;
-      import('aos').then(aos => {
-        aos.init({
-          duration: 800, // Reduced from 1000
-          once: true,
-          easing: 'ease-out',
-          startEvent: 'DOMContentLoaded',
-          disable: window.innerWidth < 768 ? true : false, // Disable on mobile for better performance
-        });
-      }).catch(() => {
-        console.warn('AOS initialization failed');
-      });
-    }
+    // Clean up subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadRestaurantDetails(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.restaurantService.getById(this.restaurantId).subscribe({
-      next: (restaurant) => {
-        this.restaurant = restaurant;
-        this.loadMenuItems();
+    // Use forkJoin to make parallel API calls
+    forkJoin({
+      restaurant: this.restaurantService.getById(this.restaurantId),
+      menuItems: this.menuItemService.getByRestaurant(this.restaurantId)
+    }).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: (result) => {
+        this.restaurant = result.restaurant;
+        
+        // Pre-process menu items to add isPopular flag
+        this.menuItems = result.menuItems.map(item => ({
+          ...item,
+          isPopular: Math.random() > 0.7 // ~30% of items will be marked as popular
+        }));
+        
+        this.initializeQuantities();
       },
       error: (error) => {
-        this.isLoading = false;
         this.errorMessage = error.message || 'Failed to load restaurant details';
+        this.cdr.markForCheck();
       }
     });
   }
 
-  loadMenuItems(): void {
-    this.menuItemService.getByRestaurant(this.restaurantId).subscribe({
-      next: (items) => {
-        // Pre-process menu items to add isPopular flag
-        this.menuItems = items.map(item => {
-          return {
-            ...item,
-            isPopular: Math.random() > 0.7 // ~30% of items will be marked as popular
-          };
-        });
-        
-        this.initializeQuantities();
-        this.isLoading = false;
-        
-        // Initialize AOS after data is loaded
-        setTimeout(() => this.initializeAOS(), 100);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error.message || 'Failed to load menu items';
+  initializeQuantities(): void {
+    this.menuItems.forEach(item => {
+      if (item.id && !this.itemQuantities[item.id]) {
+        this.itemQuantities[item.id] = 1;
       }
     });
   }
@@ -159,31 +150,27 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
     // Only managers or admins can start orders
     if (!this.authService.isManager && !this.authService.isAdmin) {
       this.errorMessage = 'Only restaurant managers or admins can start orders';
+      this.cdr.markForCheck();
       return;
     }
 
     const managerId = this.authService.currentUser?.id || '';
     
-    this.orderService.startOrder(this.restaurantId, managerId).subscribe({
-      next: (orderId) => {
-        this.router.navigate(['/orders', orderId]);
-      },
-      error: (error) => {
-        this.errorMessage = error.message || 'Failed to start order';
-      }
-    });
-  }
-  
-  initializeQuantities(): void {
-    this.menuItems.forEach(item => {
-      if (item.id && !this.itemQuantities[item.id]) {
-        this.itemQuantities[item.id] = 1;
-      }
-    });
+    this.orderService.startOrder(this.restaurantId, managerId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (orderId) => {
+          this.router.navigate(['/orders', orderId]);
+        },
+        error: (error) => {
+          this.errorMessage = error.message || 'Failed to start order';
+          this.cdr.markForCheck();
+        }
+      });
   }
   
   trackByMenuItem(index: number, item: MenuItem): string {
-    return item.id || index.toString();
+    return item.id || String(index);
   }
   
   trackByReview(index: number, review: ReviewViewModel): number {
@@ -197,12 +184,14 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   increaseQuantity(item: MenuItem): void {
     if (item.id && this.itemQuantities[item.id] < 10) {
       this.itemQuantities[item.id]++;
+      this.cdr.markForCheck();
     }
   }
   
   decreaseQuantity(item: MenuItem): void {
     if (item.id && this.itemQuantities[item.id] > 1) {
       this.itemQuantities[item.id]--;
+      this.cdr.markForCheck();
     }
   }
 
@@ -220,6 +209,7 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   // Helper methods for UI
   toggleFavorite(): void {
     this.isFavorite = !this.isFavorite;
+    this.cdr.markForCheck();
     // In a real app, would call API to save favorite status
   }
   
@@ -252,36 +242,39 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   }
   
   getRandomCuisines(): string[] {
-    // Return 2-3 random cuisine types
-    const numCuisines = 2 + Math.floor(Math.random() * 2); // 2 or 3 cuisines
+    // Return 1-2 random cuisines
+    const numCuisines = 1 + Math.floor(Math.random() * 2); // 1 or 2 cuisines
     const shuffled = [...this.availableCuisines].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, numCuisines);
   }
   
   getDummyReviews(): ReviewViewModel[] {
-    // Generate some dummy reviews for the UI
-    return [
-      {
-        name: 'Sarah Johnson',
-        avatarId: '1',
-        rating: 5,
-        date: '2 days ago',
-        comment: 'Amazing food and great service! The pasta was perfectly cooked and the sauce was delicious. Will definitely be ordering again!'
-      },
-      {
-        name: 'Michael Chen',
-        avatarId: '2',
-        rating: 4,
-        date: '1 week ago',
-        comment: 'Food was delivered promptly and still hot. Great flavor, though portions could be a bit bigger. Overall a good experience.'
-      },
-      {
-        name: 'Jessica Williams',
-        avatarId: '3',
-        rating: 5,
-        date: '2 weeks ago',
-        comment: "Best restaurant in town! The chef really knows what they're doing. Every dish I've tried has been exceptional."
-      }
+    // Generate 3-5 random reviews
+    const numReviews = 3 + Math.floor(Math.random() * 3); // 3, 4, or 5 reviews
+    const reviews: ReviewViewModel[] = [];
+    
+    const names = ['John D.', 'Sarah M.', 'Michael T.', 'Emily R.', 'David K.', 'Jessica L.'];
+    const comments = [
+      'Great food and excellent service! Will definitely come back again.',
+      'The food was delicious but the service could be a bit faster.',
+      'Amazing flavors and very reasonable prices. Highly recommended!',
+      'Nice atmosphere but the food was just okay. Might try again.',
+      'Outstanding dining experience from start to finish!'
     ];
+    
+    for (let i = 0; i < numReviews; i++) {
+      const randomDay = 1 + Math.floor(Math.random() * 28);
+      const randomMonth = 1 + Math.floor(Math.random() * 12);
+      const review: ReviewViewModel = {
+        name: names[Math.floor(Math.random() * names.length)],
+        avatarId: (i + 1).toString(),
+        rating: 3 + Math.floor(Math.random() * 3), // Rating between 3-5
+        date: `${randomMonth}/${randomDay}/2023`,
+        comment: comments[Math.floor(Math.random() * comments.length)]
+      };
+      reviews.push(review);
+    }
+    
+    return reviews;
   }
 } 

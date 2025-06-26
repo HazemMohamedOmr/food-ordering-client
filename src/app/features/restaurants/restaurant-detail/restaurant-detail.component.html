@@ -1,6 +1,6 @@
 <div class="restaurant-detail-container">
   <!-- Error Message -->
-  <div *ngIf="errorMessage" class="alert alert-custom animate__animated animate__headShake">
+  <div *ngIf="errorMessage" class="alert alert-custom">
     <i class="fas fa-exclamation-circle me-2"></i> {{ errorMessage }}
   </div>
   
@@ -21,8 +21,8 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-8 restaurant-hero-content">
-            <h1 class="animate__animated animate__fadeInUp">{{ restaurant.name }}</h1>
-            <div class="restaurant-meta animate__animated animate__fadeInUp animate__delay-1s">
+            <h1>{{ restaurant.name }}</h1>
+            <div class="restaurant-meta">
               <div class="meta-item">
                 <i class="fas fa-map-marker-alt"></i> {{ restaurant.address }}
               </div>
@@ -40,11 +40,11 @@
               </div>
             </div>
             
-            <div class="restaurant-tags animate__animated animate__fadeInUp animate__delay-2s">
+            <div class="restaurant-tags">
               <span class="tag" *ngFor="let tag of restaurantTags">{{ tag }}</span>
             </div>
             
-            <div class="restaurant-actions animate__animated animate__fadeInUp animate__delay-3s" *ngIf="authService.isLoggedIn">
+            <div class="restaurant-actions" *ngIf="authService.isLoggedIn">
               <button class="btn btn-primary btn-action" (click)="startOrder()" *ngIf="authService.isManager || authService.isAdmin">
                 <i class="fas fa-plus-circle me-2"></i> Start New Order
               </button>
@@ -66,7 +66,7 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-8">
-            <div class="restaurant-description-card" data-aos="fade-up">
+            <div class="restaurant-description-card">
               <h2>About {{ restaurant.name }}</h2>
               <p>{{ restaurant.description }}</p>
               
@@ -100,11 +100,11 @@
           </div>
           
           <div class="col-lg-4">
-            <div class="restaurant-map-card" data-aos="fade-up">
+            <div class="restaurant-map-card">
               <h3>Location</h3>
               <div class="map-placeholder">
                 <img src="https://maps.googleapis.com/maps/api/staticmap?center={{ restaurant.address }}&zoom=15&size=600x300&maptype=roadmap&markers=color:red%7C{{ restaurant.address }}&key=YOUR_API_KEY" 
-                     alt="Restaurant location map" class="img-fluid" loading="lazy">
+                     alt="Restaurant location map" class="img-fluid" width="600" height="300" loading="lazy">
               </div>
               <div class="map-actions">
                 <a href="https://maps.google.com/?q={{ restaurant.address }}" target="_blank" class="btn btn-outline-primary btn-sm">
@@ -118,7 +118,7 @@
     </section>
     
     <!-- Menu Section -->
-    <section class="menu-section" data-aos="fade-up">
+    <section class="menu-section">
       <div class="container">
         <div class="section-heading">
           <h2>Menu</h2>
@@ -140,11 +140,11 @@
         </div>
         
         <div class="row">
-          @for (item of menuItems; track trackByMenuItem(i, item)) {
-            <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up">
+          @for (item of menuItems; track trackByMenuItem($index, item)) {
+            <div class="col-md-6 col-lg-4 mb-4">
               <div class="menu-item-card">
                 <div class="menu-item-image">
-                  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" class="img-fluid" alt="{{ item.name }}" loading="lazy">
+                  <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop" class="img-fluid" width="400" height="300" alt="{{ item.name }}" loading="lazy">
                   <div class="menu-item-badge" *ngIf="item.isPopular">
                     <i class="fas fa-fire"></i> Popular
                   </div>
@@ -175,7 +175,7 @@
     </section>
     
     <!-- Reviews Section -->
-    <section class="reviews-section" data-aos="fade-up">
+    <section class="reviews-section">
       <div class="container">
         <div class="section-heading">
           <h2>Customer Reviews</h2>
@@ -185,11 +185,11 @@
         </div>
         
         <div class="reviews-list">
-          <div class="review-card" *ngFor="let review of reviews; trackBy: trackByReview" data-aos="fade-up">
+          <div class="review-card" *ngFor="let review of reviews; trackBy: trackByReview">
             <div class="review-header">
               <div class="reviewer-info">
                 <div class="reviewer-avatar">
-                  <img src="https://i.pravatar.cc/150?img={{ review.avatarId }}" alt="Reviewer" loading="lazy">
+                  <img src="https://i.pravatar.cc/150?img={{ review.avatarId }}" width="50" height="50" alt="Reviewer" loading="lazy">
                 </div>
                 <div class="reviewer-details">
                   <h4>{{ review.name }}</h4>

@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { SharedModule } from '../../../shared/shared.module';
 import { RestaurantService } from '../../../core/services/restaurant.service';
 import { Restaurant } from '../../../core/models/restaurant.model';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Subscription, Observable, map, debounceTime, distinctUntilChanged, Subject, takeUntil, BehaviorSubject, finalize } from 'rxjs';
 
 interface RestaurantViewModel extends Restaurant {
   rating?: string;
@@ -15,17 +16,22 @@ interface RestaurantViewModel extends Restaurant {
   templateUrl: './restaurant-list.component.html',
   styleUrls: ['./restaurant-list.component.scss'],
   standalone: true,
-  imports: [SharedModule, FormsModule]
+  imports: [SharedModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RestaurantListComponent implements OnInit, OnDestroy {
   restaurants: RestaurantViewModel[] = [];
   filteredRestaurants: RestaurantViewModel[] = [];
-  isLoading = false;
+  isLoading = true; // Start with true to show loading state immediately
   errorMessage = '';
   searchQuery = '';
   sortOption = 'name';
   selectedCuisine = 'all';
   aosInitialized = false;
+  
+  // Track subscriptions for cleanup
+  private destroy$ = new Subject<void>();
+  private searchDebounce$ = new Subject<string>();
   
   // These would ideally come from the backend
   availableTags: string[] = [
@@ -36,66 +42,128 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
 
   constructor(
     private restaurantService: RestaurantService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    // Prefetch restaurants data to minimize loading delays
+    // Only setup the search debouncing when we have more than a few restaurants
     this.loadRestaurants();
+    
+    this.searchDebounce$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.filterRestaurants();
+        this.cdr.markForCheck();
+      });
   }
   
   ngOnDestroy(): void {
-    // Clean up any subscriptions or resources
+    // Clean up subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onSearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    
+    // For small datasets, skip debounce for instant results
+    if (this.restaurants.length < 5) {
+      this.searchQuery = input.value;
+      this.filterRestaurants();
+      this.cdr.markForCheck();
+    } else {
+      this.searchQuery = input.value;
+      this.searchDebounce$.next(input.value);
+    }
   }
 
   loadRestaurants(): void {
     this.isLoading = true;
-    this.errorMessage = '';
-
-    this.restaurantService.getAll().subscribe({
-      next: (data) => {
-        // Pre-compute random values for each restaurant to avoid repeated calculations
-        this.restaurants = data.map(restaurant => {
-          const enhancedRestaurant: RestaurantViewModel = {
-            ...restaurant,
-            rating: this.generateRandomRating(),
-            tags: this.getRandomTags()
-          };
-          return enhancedRestaurant;
+    this.cdr.markForCheck();
+    
+    // Add a short timeout to ensure the loading spinner appears
+    // Might seem counterintuitive but helps with perceived performance
+    setTimeout(() => {
+      this.restaurantService.getAll()
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => {
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          })
+        )
+        .subscribe({
+          next: (data) => {
+            if (data.length === 0) {
+              this.restaurants = [];
+              this.filteredRestaurants = [];
+              return;
+            }
+            
+            // Optimize for small datasets - simpler and faster processing
+            if (data.length < 5) {
+              this.restaurants = data.map(restaurant => ({
+                ...restaurant,
+                rating: (4.0 + Math.random()).toFixed(1),
+                tags: this.getSimpleTags(restaurant)
+              }));
+            } else {
+              this.restaurants = this.enhanceRestaurants(data);
+            }
+            
+            this.filteredRestaurants = [...this.restaurants];
+            this.sortRestaurants(); // Apply default sorting
+          },
+          error: (error) => {
+            this.errorMessage = error.message || 'Failed to load restaurants';
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          }
         });
-        
-        this.filteredRestaurants = [...this.restaurants];
-        this.sortRestaurants(); // Apply default sorting
-        this.isLoading = false;
-        
-        // Initialize AOS after data is loaded for better performance
-        setTimeout(() => this.initializeAOS(), 100);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage = error.message || 'Failed to load restaurants';
-      }
-    });
+    }, 0);
   }
   
-  initializeAOS(): void {
-    if (typeof window !== 'undefined' && !this.aosInitialized) {
-      this.aosInitialized = true;
-      import('aos').then(aos => {
-        aos.init({
-          duration: 800, // Reduced from 1000
-          once: true,
-          easing: 'ease-out',
-          startEvent: 'DOMContentLoaded',
-          disable: window.innerWidth < 768 ? true : false, // Disable on mobile for better performance
-        });
-      }).catch(() => {
-        console.warn('AOS initialization failed');
-      });
+  // Optimized version for small datasets
+  getSimpleTags(restaurant: Restaurant): string[] {
+    // Simple deterministic tag generation based on restaurant properties
+    const tags: string[] = [];
+    
+    if (restaurant.name.toLowerCase().includes('pizza') || 
+        restaurant.description.toLowerCase().includes('pizza')) {
+      tags.push('Pizza');
     }
+    
+    if (restaurant.deliveryFee === 0) {
+      tags.push('Free Delivery');
+    }
+    
+    // Always ensure at least one tag
+    if (tags.length === 0) {
+      tags.push(this.availableTags[Math.floor(Math.random() * 3)]);
+    }
+    
+    return tags;
+  }
+  
+  enhanceRestaurants(restaurants: Restaurant[]): RestaurantViewModel[] {
+    return restaurants.map(restaurant => ({
+      ...restaurant,
+      rating: this.generateRandomRating(),
+      tags: this.getRandomTags(),
+    }));
   }
 
   viewRestaurant(id: string): void {
-    this.router.navigate(['/restaurants', id]);
+    this.ngZone.run(() => {
+      this.router.navigate(['/restaurants', id]);
+    });
   }
   
   trackByRestaurant(index: number, restaurant: Restaurant): string {
@@ -103,6 +171,13 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
   }
   
   filterRestaurants(): void {
+    // Skip filtering if no restaurants
+    if (this.restaurants.length === 0) {
+      this.filteredRestaurants = [];
+      return;
+    }
+    
+    // Optimization: if no filters applied, don't do any filtering
     if (!this.searchQuery.trim() && this.selectedCuisine === 'all') {
       this.filteredRestaurants = [...this.restaurants];
     } else {
@@ -129,9 +204,12 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
   filterByCuisine(cuisine: string): void {
     this.selectedCuisine = cuisine;
     this.filterRestaurants();
+    this.cdr.markForCheck();
   }
   
   sortRestaurants(): void {
+    if (this.filteredRestaurants.length <= 1) return; // Skip sorting if only 0 or 1 restaurant
+    
     switch (this.sortOption) {
       case 'name':
         this.filteredRestaurants.sort((a, b) => a.name.localeCompare(b.name));
@@ -155,7 +233,12 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
     this.selectedCuisine = 'all';
     this.sortOption = 'name';
     this.filteredRestaurants = [...this.restaurants];
-    this.sortRestaurants();
+    
+    if (this.filteredRestaurants.length > 1) {
+      this.sortRestaurants();
+    }
+    
+    this.cdr.markForCheck();
   }
   
   // Helper methods to simulate data we don't have in the API
