@@ -7,7 +7,7 @@
       <div class="container">
         <a class="navbar-brand d-flex align-items-center" routerLink="/">
           <i class="fas fa-utensils me-2"></i>
-          <span>FoodieExpress</span>
+          <span>QualiFoodie</span>
         </a>
         <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
           <i class="fas fa-bars"></i>
@@ -44,12 +44,14 @@
               </span>
             </a>
             <ng-container *ngIf="!authService.isLoggedIn">
-              <a class="nav-link me-2" routerLink="/auth/login">
-                <i class="fas fa-sign-in-alt me-1"></i> Login
-              </a>
-              <a class="btn btn-sm btn-primary rounded-pill px-3" routerLink="/auth/register">
-                <i class="fas fa-user-plus me-1"></i> Register
-              </a>
+              <div class="d-flex align-items-center">
+                <a class="nav-link me-3" routerLink="/auth/login">
+                  <i class="fas fa-sign-in-alt me-1"></i> Login
+                </a>
+                <a class="btn btn-primary rounded-pill px-3 d-flex align-items-center" routerLink="/auth/register">
+                  <i class="fas fa-user-plus me-1"></i> Register
+                </a>
+              </div>
             </ng-container>
             <ng-container *ngIf="authService.isLoggedIn">
               <div class="nav-item dropdown">
@@ -78,7 +80,7 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
-          <h5 class="text-uppercase mb-4"><i class="fas fa-utensils me-2"></i>FoodieExpress</h5>
+          <h5 class="text-uppercase mb-4"><i class="fas fa-utensils me-2"></i>QualiFoodie</h5>
           <p class="mb-3">Delicious food delivered to your doorstep. Order from the best restaurants in town with just a few clicks.</p>
           <div class="social-icons">
             <a href="#" class="me-3 text-light fs-5"><i class="fab fa-facebook"></i></a>
@@ -100,7 +102,7 @@
           <h5 class="text-uppercase mb-4">Contact Us</h5>
           <ul class="list-unstyled">
             <li class="mb-3"><i class="fas fa-map-marker-alt me-2"></i> 123 Foodie Street, Tasty City</li>
-            <li class="mb-3"><i class="fas fa-envelope me-2"></i> support&#64;foodieexpress.com</li>
+            <li class="mb-3"><i class="fas fa-envelope me-2"></i> support&#64;qualifoodie.com</li>
             <li class="mb-3"><i class="fas fa-phone me-2"></i> (555) 123-4567</li>
             <li class="mb-3"><i class="fas fa-clock me-2"></i> Mon-Sun: 8:00 AM - 11:00 PM</li>
           </ul>
@@ -120,7 +122,7 @@
       <hr class="my-4">
       <div class="row align-items-center">
         <div class="col-md-6 text-center text-md-start">
-          &copy; {{ currentYear }} FoodieExpress. All rights reserved.
+          &copy; {{ currentYear }} QualiFoodie. All rights reserved.
         </div>
         <div class="col-md-6 text-center text-md-end">
           <a href="#" class="text-light text-decoration-none me-3">Privacy Policy</a>

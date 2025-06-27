@@ -5,6 +5,6 @@ export const HOME_ROUTES: Routes = [
   {
     path: '',
     component: HomeComponent,
-    title: 'Food Ordering System - Order Food Online'
+    title: 'QualiFoodie - Order Food Online'
   }
 ]; 

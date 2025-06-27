@@ -16,70 +16,92 @@
   </div>
   
   <div *ngIf="!isLoading && order">
-    <div class="d-flex justify-content-between align-items-start mb-4">
-      <div>
-        <h1>Order Details</h1>
-        <p class="lead mb-1">
-          <span class="badge rounded-pill" [class.bg-success]="isOrderOpen()" [class.bg-secondary]="!isOrderOpen()">
-            {{ isOrderOpen() ? 'Open' : 'Closed' }}
-          </span>
-          <span class="ms-2">{{ order.restaurantName }}</span>
-        </p>
-        <p class="text-muted">Order Date: {{ formatDate(order.orderDate) }}</p>
-        <p *ngIf="isOrderOpen()" class="text-success">
-          <i class="bi bi-info-circle me-2"></i> You can modify your order items while the order is open.
-        </p>
-        <p *ngIf="!isOrderOpen() && order.closedAt" class="text-muted">
-          <i class="bi bi-lock me-2"></i> Order closed at: {{ formatDate(order.closedAt) }}
-        </p>
-        <p *ngIf="order.userPaymentStatus > 0" class="mt-2">
-          <span class="badge" [ngClass]="getPaymentStatusClass()">
-            <i class="bi" [ngClass]="{'bi-check-circle': order.userPaymentStatus === 2, 'bi-exclamation-circle': order.userPaymentStatus === 1}"></i>
-            {{ getPaymentStatusText() }}
-          </span>
-        </p>
-      </div>
-      
-      <div *ngIf="isOrderOpen() && (authService.isAdmin || authService.isManager)">
-        <button class="btn btn-danger" (click)="closeOrder()">
-          <i class="bi bi-lock me-2"></i> Close Order
-        </button>
+    <div class="card mb-4 shadow-sm bg-light">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h2 class="mb-3 fw-bold d-flex align-items-center">
+              <i class="bi bi-bag me-2 text-primary"></i>
+              Order Details
+            </h2>
+            <p class="lead mb-1">
+              <span class="badge rounded-pill px-3 py-2" [class.bg-success]="isOrderOpen()" [class.bg-secondary]="!isOrderOpen()">
+                <i class="bi" [ngClass]="isOrderOpen() ? 'bi-clock' : 'bi-lock'"></i>
+                {{ isOrderOpen() ? 'Open' : 'Closed' }}
+              </span>
+              <span class="ms-2 fw-bold">{{ order.restaurantName }}</span>
+            </p>
+            <p class="text-muted d-flex align-items-center">
+              <i class="bi bi-calendar3 me-2"></i> {{ formatDate(order.orderDate) }}
+            </p>
+            <p *ngIf="isOrderOpen()" class="text-success small">
+              <i class="bi bi-info-circle me-2"></i> You can modify your order items while the order is open.
+            </p>
+            <p *ngIf="!isOrderOpen() && order?.closedAt" class="text-muted small">
+              <i class="bi bi-lock me-2"></i> Order closed at: {{ formatDate(order?.closedAt) }}
+            </p>
+            <p *ngIf="hasPaymentStatus()" class="mt-2">
+              <span class="badge rounded-pill px-3 py-2" [ngClass]="getPaymentStatusClass()">
+                <i class="bi" [ngClass]="{'bi-check-circle': isPaid(), 'bi-exclamation-circle': isUnpaid()}"></i>
+                {{ getPaymentStatusText() }}
+              </span>
+            </p>
+          </div>
+          
+          <div>
+            <button class="btn btn-secondary me-2" routerLink="/orders">
+              <i class="bi bi-arrow-left me-2"></i> Back to Orders
+            </button>
+            <button *ngIf="isOrderOpen() && (authService.isAdmin || authService.isManager)" class="btn btn-danger" (click)="closeOrder()">
+              <i class="bi bi-lock me-2"></i> Close Order
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     
     <div class="row mb-5">
       <div class="col-md-8">
-        <div class="card shadow-sm">
-          <div class="card-header bg-light">
-            <h5 class="mb-0">Your Order Items</h5>
+        <div class="card shadow">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0 text-primary fw-bold">
+              <i class="bi bi-cart3 me-2"></i>Your Order Items
+            </h5>
           </div>
-          <div class="card-body">
-            <div *ngIf="myOrderItems.length === 0" class="alert alert-info">
+          <div class="card-body p-0">
+            <div *ngIf="myOrderItems.length === 0" class="alert alert-info m-3 mb-0">
               <i class="bi bi-info-circle me-2"></i>
               You haven't ordered anything yet.
             </div>
             
             <ul class="list-group list-group-flush" *ngIf="myOrderItems.length > 0">
               @for (item of myOrderItems; track item.id) {
-                <li class="list-group-item">
+                <li class="list-group-item py-3 border-bottom">
                   <!-- Normal view mode -->
                   <div *ngIf="editingItem?.id !== item.id" class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 class="mb-1">{{ item.menuItemName }}</h6>
-                      <p class="text-muted mb-0 small">
-                        {{ item.quantity }} x ${{ item.price?.toFixed(2) ?? '0.00' }}
-                      </p>
-                      <p class="text-muted mb-0 small" *ngIf="item.note">
-                        Note: {{ item.note }}
-                      </p>
+                    <div class="d-flex align-items-start">
+                      <div class="me-3 mt-1">
+                        <span class="badge rounded-pill bg-light text-dark px-2 py-2">
+                          {{ item.quantity }}
+                        </span>
+                      </div>
+                      <div>
+                        <h6 class="mb-1 fw-bold">{{ item.menuItemName }}</h6>
+                        <p class="text-muted mb-0 small">
+                          ${{ item.price?.toFixed(2) ?? '0.00' }} each
+                        </p>
+                        <p class="text-muted mb-0 small fst-italic" *ngIf="item.note">
+                          <i class="bi bi-chat-left-text me-1"></i>{{ item.note }}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <span class="text-primary me-3">${{ (item.total || item.itemTotal || (item.price * item.quantity)).toFixed(2) }}</span>
-                      <div class="btn-group btn-group-sm" *ngIf="canModifyItems()">
-                        <button class="btn btn-outline-primary" (click)="startEditItem(item)">
+                    <div class="text-end">
+                      <h6 class="text-primary mb-1 fw-bold">${{ (item.total || item.itemTotal || (item.price * item.quantity)).toFixed(2) }}</h6>
+                      <div class="btn-group btn-group-sm mt-1" *ngIf="canModifyItems()">
+                        <button class="btn btn-outline-primary rounded-start" (click)="startEditItem(item)" title="Edit item">
                           <i class="bi bi-pencil"></i>
                         </button>
-                        <button class="btn btn-outline-danger" (click)="deleteItem(item)">
+                        <button class="btn btn-outline-danger rounded-end" (click)="deleteItem(item)" title="Remove item">
                           <i class="bi bi-trash"></i>
                         </button>
                       </div>
@@ -87,74 +109,162 @@
                   </div>
                   
                   <!-- Edit mode -->
-                  <div *ngIf="editingItem?.id === item.id" class="edit-item-form">
-                    <div class="mb-3">
-                      <label for="editQuantity" class="form-label">Quantity</label>
-                      <div class="input-group">
-                        <button class="btn btn-outline-secondary" type="button" (click)="decreaseQuantity()">-</button>
-                        <input type="number" class="form-control text-center" id="editQuantity" [(ngModel)]="editQuantity" min="1" max="10">
-                        <button class="btn btn-outline-secondary" type="button" (click)="increaseQuantity()">+</button>
+                  <div *ngIf="editingItem?.id === item.id" class="edit-item-form p-3 border rounded bg-light mt-2 mb-1">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h6 class="fw-bold mb-0 d-flex align-items-center">
+                        <i class="bi bi-pencil-square text-primary me-2"></i>
+                        Editing: {{ item.menuItemName }}
+                      </h6>
+                      <button type="button" class="btn-close" aria-label="Close" (click)="cancelEdit()"></button>
+                    </div>
+                    
+                    <div class="row">
+                      <div class="col-md-5 mb-3">
+                        <label for="editQuantity" class="form-label fw-medium">Quantity</label>
+                        <div class="input-group">
+                          <button class="btn btn-primary" type="button" (click)="decreaseQuantity()">
+                            <i class="bi bi-dash-lg"></i>
+                          </button>
+                          <input type="number" class="form-control text-center fw-bold" id="editQuantity" [(ngModel)]="editQuantity" min="1" max="10">
+                          <button class="btn btn-primary" type="button" (click)="increaseQuantity()">
+                            <i class="bi bi-plus-lg"></i>
+                          </button>
+                        </div>
+                        <div class="form-text text-center mt-1">
+                          Min: 1 · Max: 10
+                        </div>
+                      </div>
+                      
+                      <div class="col-md-7">
+                        <div class="d-flex justify-content-between">
+                          <label for="editNote" class="form-label fw-medium">Special Instructions</label>
+                          <small class="text-muted">Optional</small>
+                        </div>
+                        <textarea 
+                          class="form-control" 
+                          id="editNote" 
+                          [(ngModel)]="editNote" 
+                          rows="2" 
+                          placeholder="Any special requests or notes for this item?">
+                        </textarea>
                       </div>
                     </div>
-                    <div class="mb-3">
-                      <label for="editNote" class="form-label">Special Instructions</label>
-                      <textarea class="form-control" id="editNote" [(ngModel)]="editNote" rows="2" placeholder="Any special requests or notes for this item?"></textarea>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                      <button class="btn btn-secondary me-2" (click)="cancelEdit()">Cancel</button>
-                      <button class="btn btn-primary" (click)="saveItemChanges()">Save Changes</button>
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                      <span class="text-primary fw-bold fs-5">
+                        Total: ${{ (editingItem?.price || 0) * editQuantity | number:'1.2-2' }}
+                      </span>
+                      <div>
+                        <button class="btn btn-outline-secondary me-2" (click)="cancelEdit()">
+                          <i class="bi bi-x-lg me-1"></i>Cancel
+                        </button>
+                        <button class="btn btn-primary" (click)="saveItemChanges()">
+                          <i class="bi bi-check-lg me-1"></i>Save Changes
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </li>
               }
             </ul>
           </div>
+          <div class="card-footer bg-white" *ngIf="myOrderItems.length > 0">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-muted">{{ myOrderItems.length }} item(s) in your order</span>
+              <span class="fw-bold">Subtotal: ${{ (order.subtotal || calculateSubtotal()).toFixed(2) }}</span>
+            </div>
+          </div>
         </div>
       </div>
       
       <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-header bg-light">
-            <h5 class="mb-0">Order Summary</h5>
+        <div class="card shadow">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0 text-primary fw-bold">
+              <i class="bi bi-receipt me-2"></i>Order Summary
+            </h5>
           </div>
           <div class="card-body">
-            <div class="d-flex justify-content-between mb-2">
-              <span>Subtotal</span>
-              <span>${{ (order.subtotal || calculateSubtotal()).toFixed(2) }}</span>
+            <div class="d-flex justify-content-between mb-3">
+              <span class="fw-medium">Subtotal</span>
+              <span class="fw-medium">${{ (order.subtotal || calculateSubtotal()).toFixed(2) }}</span>
             </div>
-            <div class="d-flex justify-content-between mb-2">
-              <span>Delivery Fee</span>
-              <span *ngIf="!isOrderOpen()">${{ order.deliveryFeeShare?.toFixed(2) ?? '0.00' }}</span>
-              <span *ngIf="isOrderOpen()" class="text-muted">Calculated when order closes</span>
+            <div class="d-flex justify-content-between mb-3">
+              <span class="fw-medium">Delivery Fee</span>
+              <span *ngIf="!isOrderOpen()" class="fw-medium">${{ order.deliveryFeeShare?.toFixed(2) ?? '0.00' }}</span>
+              <span *ngIf="isOrderOpen()" class="text-muted fst-italic">Calculated when order closes</span>
             </div>
-            <hr>
-            <div class="d-flex justify-content-between mb-0 fw-bold">
-              <span>Total</span>
-              <span>${{ (order.total || calculateTotal()).toFixed(2) }}</span>
+            <hr class="my-3">
+            <div class="d-flex justify-content-between fw-bold">
+              <span class="fs-5">Total</span>
+              <span class="fs-5 text-primary">${{ (order.total || calculateTotal()).toFixed(2) }}</span>
             </div>
             
-            <div *ngIf="getDeliveryFeeNote()" class="alert alert-info mt-3 mb-0 py-2 small">
+            <div *ngIf="getDeliveryFeeNote()" class="alert alert-info mt-4 mb-0 py-2 small">
               <i class="bi bi-info-circle me-1"></i> {{ getDeliveryFeeNote() }}
             </div>
           </div>
         </div>
         
-        <div class="card mt-3 shadow-sm">
-          <div class="card-header bg-light">
-            <h5 class="mb-0">Manager</h5>
+        <div class="card mt-3 shadow">
+          <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0 text-primary fw-bold">
+              <i class="bi bi-person-badge me-2"></i>Manager
+            </h5>
           </div>
           <div class="card-body">
-            <p class="mb-0"><i class="bi bi-person me-2"></i> {{ order.managerName }}</p>
-            <p class="mb-0" *ngIf="order.managerEmail"><i class="bi bi-envelope me-2"></i> {{ order.managerEmail }}</p>
+            <p class="d-flex align-items-center mb-2">
+              <i class="bi bi-person me-2 text-muted"></i> 
+              <span class="fw-medium">{{ order.managerName }}</span>
+            </p>
+            <p class="d-flex align-items-center mb-0" *ngIf="order.managerEmail">
+              <i class="bi bi-envelope me-2 text-muted"></i> 
+              <a href="mailto:{{ order.managerEmail }}" class="text-decoration-none">{{ order.managerEmail }}</a>
+            </p>
           </div>
         </div>
       </div>
     </div>
   </div>
-  
-  <div class="mt-4">
-    <button class="btn btn-secondary" routerLink="/orders">
-      <i class="bi bi-arrow-left me-2"></i> Back to Orders
-    </button>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Confirm Deletion
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeDeleteModal()" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="d-flex align-items-center mb-3">
+          <div class="text-danger me-3">
+            <i class="bi bi-trash fs-1"></i>
+          </div>
+          <div>
+            <h5 class="mb-1">Remove Item From Order</h5>
+            <p class="mb-0" *ngIf="itemToDelete">Are you sure you want to remove <strong>{{ itemToDelete?.menuItemName }}</strong> from your order?</p>
+          </div>
+        </div>
+        <div class="alert alert-warning">
+          <i class="bi bi-info-circle me-2"></i>
+          This action cannot be undone. You will have to add the item again if you change your mind.
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary" (click)="closeDeleteModal()">
+          <i class="bi bi-x-lg me-1"></i>Cancel
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()" [disabled]="isLoading">
+          <i class="bi bi-trash me-1"></i>Yes, Remove Item
+        </button>
+      </div>
+    </div>
   </div>
-</div> 
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showDeleteModal"></div> 

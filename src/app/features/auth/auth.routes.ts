@@ -6,12 +6,12 @@ export const AUTH_ROUTES: Routes = [
   {
     path: 'login',
     component: LoginComponent,
-    title: 'Login - Food Ordering System'
+    title: 'Login - QualiFoodie'
   },
   {
     path: 'register',
     component: RegisterComponent,
-    title: 'Register - Food Ordering System'
+    title: 'Register - QualiFoodie'
   },
   {
     path: '',

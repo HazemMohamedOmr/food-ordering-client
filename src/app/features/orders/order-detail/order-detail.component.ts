@@ -62,6 +62,10 @@ export class OrderDetailComponent implements OnInit {
   editingItem: UserOrderItem | null = null;
   editQuantity: number = 1;
   editNote: string = '';
+  
+  // For delete confirmation modal
+  itemToDelete: UserOrderItem | null = null;
+  showDeleteModal = false;
 
   // For template use
   OrderStatus = OrderStatus;
@@ -345,31 +349,44 @@ export class OrderDetailComponent implements OnInit {
       return;
     }
     
-    if (confirm('Are you sure you want to remove this item from your order?')) {
-      this.isLoading = true;
-      this.errorMessage = '';
-      
-      this.orderService.deleteOrderItem(item.id).subscribe({
-        next: () => {
-          this.successMessage = 'Item removed successfully';
-          
-          // Remove the item locally
-          this.myOrderItems = this.myOrderItems.filter(i => i.id !== item.id);
-          
-          // Update the order's totals
-          if (this.order) {
-            this.order.subtotal = this.calculateSubtotal();
-            this.order.total = this.calculateTotal();
-          }
-          
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.message || 'Failed to remove item';
+    // Show the delete confirmation modal
+    this.itemToDelete = item;
+    this.showDeleteModal = true;
+  }
+
+  confirmDelete(): void {
+    if (!this.itemToDelete || !this.itemToDelete.id) return;
+    
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.orderService.deleteOrderItem(this.itemToDelete.id).subscribe({
+      next: () => {
+        this.successMessage = 'Item removed successfully';
+        
+        // Remove the item locally
+        this.myOrderItems = this.myOrderItems.filter(i => i.id !== this.itemToDelete?.id);
+        
+        // Update the order's totals
+        if (this.order) {
+          this.order.subtotal = this.calculateSubtotal();
+          this.order.total = this.calculateTotal();
         }
-      });
-    }
+        
+        this.isLoading = false;
+        this.closeDeleteModal();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Failed to remove item';
+        this.closeDeleteModal();
+      }
+    });
+  }
+
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.itemToDelete = null;
   }
 
   calculateSubtotal(): number {
@@ -437,5 +454,17 @@ export class OrderDetailComponent implements OnInit {
     } else {
       return '';
     }
+  }
+
+  hasPaymentStatus(): boolean {
+    return !!this.order && typeof this.order.userPaymentStatus === 'number' && this.order.userPaymentStatus > 0;
+  }
+
+  isPaid(): boolean {
+    return !!this.order && this.order.userPaymentStatus === 2;
+  }
+
+  isUnpaid(): boolean {
+    return !!this.order && this.order.userPaymentStatus === 1;
   }
 } 

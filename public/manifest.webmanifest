@@ -1,6 +1,6 @@
 {
-  "name": "food-ordering-client",
-  "short_name": "food-ordering-client",
+  "name": "QualiFoodie",
+  "short_name": "QualiFoodie",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
