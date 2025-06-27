@@ -4,5 +4,5 @@
 // };
  export const environment = {
   production: true,
-  apiUrl: 'http://fod.runasp.net/api'
+  apiUrl: 'https://fod.runasp.net/api'
 }; 
