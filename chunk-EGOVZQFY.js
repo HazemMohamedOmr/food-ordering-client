@@ -1,1 +1,0 @@
-import"./chunk-AIZVJUQQ.js";var o=[{path:"",loadComponent:()=>import("./chunk-UIEXQXXF.js").then(t=>t.RestaurantListComponent),title:"Restaurants - QualiFoodie"},{path:":id",loadComponent:()=>import("./chunk-YGZERZTJ.js").then(t=>t.RestaurantDetailComponent),title:"Restaurant Details - QualiFoodie"}];export{o as RESTAURANTS_ROUTES};
