@@ -128,14 +128,30 @@
     <!-- Menu Section -->
     <section class="menu-section">
       <div class="container">
-        <div class="section-heading">
+        <div class="section-heading mb-4">
           <h2>Menu</h2>
-          <div class="menu-filter">
-            <button class="btn btn-outline-secondary btn-sm active">All</button>
-            <button class="btn btn-outline-secondary btn-sm">Appetizers</button>
-            <button class="btn btn-outline-secondary btn-sm">Main Courses</button>
-            <button class="btn btn-outline-secondary btn-sm">Desserts</button>
-            <button class="btn btn-outline-secondary btn-sm">Beverages</button>
+          <div class="search-filter-container">
+            <div class="menu-search">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-search"></i>
+                </span>
+                <input type="text" class="form-control" 
+                       placeholder="Search menu items..." 
+                       [(ngModel)]="menuSearchQuery"
+                       (input)="onSearchInput()">
+                <button *ngIf="menuSearchQuery" class="btn btn-clear" type="button" (click)="menuSearchQuery = ''; searchMenuItems()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="menu-filter">
+              <button class="btn btn-outline-secondary btn-sm active">All</button>
+              <button class="btn btn-outline-secondary btn-sm">Appetizers</button>
+              <button class="btn btn-outline-secondary btn-sm">Main Courses</button>
+              <button class="btn btn-outline-secondary btn-sm">Desserts</button>
+              <button class="btn btn-outline-secondary btn-sm">Beverages</button>
+            </div>
           </div>
         </div>
         
@@ -145,6 +161,17 @@
           </div>
           <h3>No Menu Items Available</h3>
           <p>This restaurant hasn't added any menu items yet. Check back later!</p>
+        </div>
+        
+        <div *ngIf="filteredMenuItems.length === 0 && menuItems.length > 0" class="empty-search-state text-center my-5">
+          <div class="empty-state-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>No matching menu items</h3>
+          <p>We couldn't find any menu items matching "<span class="search-term">{{ menuSearchQuery }}</span>"</p>
+          <button class="btn btn-primary rounded-pill px-4" (click)="menuSearchQuery = ''; searchMenuItems();">
+            <i class="fas fa-redo me-2"></i> Clear Search
+          </button>
         </div>
         
         <div class="row">
@@ -163,7 +190,7 @@
             </div>
           </div>
           
-          @for (item of menuItems; track trackByMenuItem($index, item)) {
+          @for (item of filteredMenuItems; track trackByMenuItem($index, item)) {
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="menu-item-card">
                 <div class="menu-item-image">

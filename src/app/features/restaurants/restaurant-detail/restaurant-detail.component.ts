@@ -39,6 +39,8 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
   restaurantId: string;
   restaurant: Restaurant | null = null;
   menuItems: MenuItemViewModel[] = [];
+  filteredMenuItems: MenuItemViewModel[] = [];
+  menuSearchQuery: string = '';
   isLoading = false;
   errorMessage = '';
   successMessage = '';
@@ -151,6 +153,9 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
           ...item,
           isPopular: Math.random() > 0.7 // ~30% of items will be marked as popular
         }));
+        
+        // Initialize filtered menu items with all menu items
+        this.filteredMenuItems = [...this.menuItems];
         
         this.initializeQuantities();
       },
@@ -562,5 +567,22 @@ export class RestaurantDetailComponent implements OnInit, OnDestroy {
     }
     
     return reviews;
+  }
+
+  searchMenuItems(): void {
+    if (!this.menuSearchQuery || this.menuSearchQuery.trim() === '') {
+      this.filteredMenuItems = [...this.menuItems];
+    } else {
+      const searchTerm = this.menuSearchQuery.toLowerCase().trim();
+      this.filteredMenuItems = this.menuItems.filter(item => 
+        item.name.toLowerCase().includes(searchTerm) || 
+        (item.description && item.description.toLowerCase().includes(searchTerm))
+      );
+    }
+    this.cdr.markForCheck();
+  }
+
+  onSearchInput(): void {
+    this.searchMenuItems();
   }
 } 
