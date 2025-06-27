@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/cart/cart.component.scss"],
-  "sourcesContent": ["/* Cart Component Styles */\r\n.form-control-sm {\r\n  font-size: 0.875rem;\r\n}\r\n\r\n.form-floating > .form-control-sm {\r\n  height: calc(2.5rem + 2px);\r\n  padding-top: 1rem;\r\n  padding-bottom: 0.25rem;\r\n}\r\n\r\n.form-floating > label {\r\n  padding: 0.5rem 0.75rem;\r\n}\r\n\r\n.input-group .form-control:focus {\r\n  z-index: 0;\r\n}\r\n\r\n.card {\r\n  border: none;\r\n  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);\r\n}\r\n\r\n.list-group-item {\r\n  border-left: none;\r\n  border-right: none;\r\n}\r\n\r\n.list-group-item:first-child {\r\n  border-top: none;\r\n}\r\n\r\n.list-group-item:last-child {\r\n  border-bottom: none;\r\n} "],
-  "mappings": ";AACA,CAAA;AACE,aAAA;;AAGF,CAAA,cAAA,EAAA,CAJA;AAKE,UAAA,KAAA,OAAA,EAAA;AACA,eAAA;AACA,kBAAA;;AAGF,CANA,cAMA,EAAA;AACE,WAAA,OAAA;;AAGF,CAAA,YAAA,CAAA,YAAA;AACE,WAAA;;AAGF,CAAA;AACE,UAAA;AACA,cAAA,EAAA,SAAA,QAAA,KAAA,CAAA,EAAA,CAAA,EAAA,CAAA,EAAA;;AAGF,CAAA;AACE,eAAA;AACA,gBAAA;;AAGF,CALA,eAKA;AACE,cAAA;;AAGF,CATA,eASA;AACE,iBAAA;;",
-  "names": []
-}

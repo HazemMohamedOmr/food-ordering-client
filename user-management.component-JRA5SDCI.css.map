@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/admin/user-management/user-management.component.scss"],
-  "sourcesContent": ["// Add specific styles for the user management component\r\n.table {\r\n  td, th {\r\n    vertical-align: middle;\r\n  }\r\n}\r\n\r\n.badge {\r\n  font-size: 0.85rem;\r\n  padding: 0.35em 0.65em;\r\n} "],
-  "mappings": ";AAEE,CAAA,MAAA;AAAA,CAAA,MAAA;AACE,kBAAA;;AAIJ,CAAA;AACE,aAAA;AACA,WAAA,OAAA;;",
-  "names": []
-}

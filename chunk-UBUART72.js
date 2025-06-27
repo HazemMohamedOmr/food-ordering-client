@@ -1,0 +1,1 @@
+import"./chunk-AIZVJUQQ.js";var t=[{path:"",loadComponent:()=>import("./chunk-YLMZRNSS.js").then(o=>o.OrderListComponent),title:"My Orders - QualiFoodie"},{path:":id",loadComponent:()=>import("./chunk-WKWR3M6F.js").then(o=>o.OrderDetailComponent),title:"Order Details - QualiFoodie"}];export{t as ORDERS_ROUTES};

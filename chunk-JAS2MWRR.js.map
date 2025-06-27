@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/app/features/orders/orders.routes.ts"],
-  "sourcesContent": ["import { Routes } from '@angular/router';\r\n\r\nexport const ORDERS_ROUTES: Routes = [\r\n  {\r\n    path: '',\r\n    loadComponent: () => import('./order-list/order-list.component').then(m => m.OrderListComponent),\r\n    title: 'My Orders - QualiFoodie'\r\n  },\r\n  {\r\n    path: ':id',\r\n    loadComponent: () => import('./order-detail/order-detail.component').then(m => m.OrderDetailComponent),\r\n    title: 'Order Details - QualiFoodie'\r\n  }\r\n]; "],
-  "mappings": ";;;AAEO,IAAM,gBAAwB;EACnC;IACE,MAAM;IACN,eAAe,MAAM,OAAO,qBAAmC,EAAE,KAAK,OAAK,EAAE,kBAAkB;IAC/F,OAAO;;EAET;IACE,MAAM;IACN,eAAe,MAAM,OAAO,qBAAuC,EAAE,KAAK,OAAK,EAAE,oBAAoB;IACrG,OAAO;;;",
-  "names": []
-}
