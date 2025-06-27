@@ -763,8 +763,9 @@ var AppComponent = class _AppComponent {
   ngOnInit() {
     this.checkScroll();
     if (typeof window !== "undefined") {
-      import("./chunk-ZZVPUCXE.js").then((aos) => {
-        aos.init({
+      import("./chunk-ZZVPUCXE.js").then((module) => {
+        const AOS = module.default;
+        AOS.init({
           duration: 1e3,
           once: true,
           easing: "ease"
@@ -1121,4 +1122,4 @@ bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err))
    * found in the LICENSE file at https://angular.dev/license
    *)
 */
-//# sourceMappingURL=main-FSYFO3FC.js.map
+//# sourceMappingURL=main-7ULLM7B3.js.map

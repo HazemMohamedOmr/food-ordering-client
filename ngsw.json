@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1751045017173,
+  "timestamp": 1751045713375,
   "index": "/food-ordering-client/index.html",
   "assetGroups": [
     {
@@ -40,7 +40,7 @@
         "/food-ordering-client/chunk-ZZVPUCXE.js",
         "/food-ordering-client/favicon.ico",
         "/food-ordering-client/index.html",
-        "/food-ordering-client/main-FSYFO3FC.js",
+        "/food-ordering-client/main-7ULLM7B3.js",
         "/food-ordering-client/manifest.webmanifest",
         "/food-ordering-client/polyfills-5OKMR5GC.js",
         "/food-ordering-client/scripts-F2NINZCO.js",
@@ -116,8 +116,8 @@
     "/food-ordering-client/icons/icon-512x512.png": "fdc47fb1ef161869719a17a5ac4cc0c4f88ae4f8",
     "/food-ordering-client/icons/icon-72x72.png": "1fe669c7c3cd4d080c59adb2cfd4481d82755ec3",
     "/food-ordering-client/icons/icon-96x96.png": "dfe7399124789918a1d9809a670cd358c80ff116",
-    "/food-ordering-client/index.html": "e9a2f08575b48fb0f7b7a978253f60cd60ac27e5",
-    "/food-ordering-client/main-FSYFO3FC.js": "7d85b9a3c175b23bd2da43ca7c9fd37e5fb23b69",
+    "/food-ordering-client/index.html": "ed041eff180b7abcf17c74f72d5ebe42f5484c6b",
+    "/food-ordering-client/main-7ULLM7B3.js": "f0301471984afee626a7099eff9bd9d999dd93bf",
     "/food-ordering-client/manifest.webmanifest": "94d53362d3f435e6ee2f178889b19f15a5eec636",
     "/food-ordering-client/media/bootstrap-icons-CVBWLLHT.woff2": "b441fcff939e24fa0906a37b7788788b9fddbb68",
     "/food-ordering-client/media/bootstrap-icons-VQNJTM6Q.woff": "762010c79b4a05e1131fc8fb3b1aeff324d8033f",
