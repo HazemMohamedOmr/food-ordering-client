@@ -294,12 +294,8 @@ export class OrderDetailComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
     
-    // Create an OrderItem object for the API
-    const updatedItem: OrderItem = {
-      id: this.editingItem.id,
-      orderId: this.orderId,
-      userId: this.authService.currentUser?.id || '',
-      menuItemId: this.editingItem.menuItemId || '',
+    // Create an object with just the required fields for the API
+    const updatedItem = {
       quantity: this.editQuantity,
       note: this.editNote
     };
@@ -307,10 +303,13 @@ export class OrderDetailComponent implements OnInit {
     this.orderService.updateOrderItem(this.editingItem.id, updatedItem).subscribe({
       next: () => {
         this.successMessage = 'Item updated successfully';
+        
+        // Store the ID before setting editingItem to null
+        const editedItemId = this.editingItem?.id;
         this.editingItem = null;
         
         // Update the local item
-        const itemIndex = this.myOrderItems.findIndex(item => item.id === updatedItem.id);
+        const itemIndex = this.myOrderItems.findIndex(item => item.id === editedItemId);
         if (itemIndex !== -1) {
           this.myOrderItems[itemIndex].quantity = this.editQuantity;
           this.myOrderItems[itemIndex].note = this.editNote;

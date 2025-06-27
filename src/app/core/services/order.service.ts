@@ -234,8 +234,12 @@ export class OrderService {
     return this.http.post<OrderItem>(`${this.apiUrl}/items`, orderItem);
   }
 
-  updateOrderItem(id: string, orderItem: OrderItem): Observable<OrderItem> {
-    return this.http.put<OrderItem>(`${this.apiUrl}/items/${id}`, orderItem);
+  updateOrderItem(id: string, orderItem: { quantity: number, note?: string }): Observable<OrderItem> {
+    return this.http.put<OrderItem>(`${this.apiUrl}/items/${id}`, {
+      orderItemId: id,
+      quantity: orderItem.quantity,
+      note: orderItem.note || ''
+    });
   }
 
   deleteOrderItem(id: string): Observable<any> {

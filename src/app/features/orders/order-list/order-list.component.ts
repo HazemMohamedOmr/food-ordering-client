@@ -72,7 +72,9 @@ export class OrderListComponent implements OnInit {
     this.orderService.getMyOrderHistory().subscribe({
       next: (orders: any) => {
         console.log('Order history response:', orders);
-        this.orderHistory = this.processOrdersResponse(orders);
+        const allOrderHistory = this.processOrdersResponse(orders);
+        // Filter out orders with status "Open" from the history section
+        this.orderHistory = allOrderHistory.filter(order => order.status !== OrderStatus.Open);
         this.isLoading = false;
       },
       error: (error) => {
