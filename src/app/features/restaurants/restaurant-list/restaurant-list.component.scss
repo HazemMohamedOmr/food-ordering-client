@@ -368,7 +368,8 @@
 // Responsive Adjustments
 @media (max-width: 991.98px) {
   .restaurant-hero {
-    padding: 100px 0 60px;
+    padding: 120px 0 60px;
+    margin-top: 0; /* Remove negative margin on mobile */
   }
   
   .restaurant-hero h1 {
@@ -378,7 +379,7 @@
 
 @media (max-width: 767.98px) {
   .restaurant-hero {
-    padding: 80px 0 40px;
+    padding: 130px 0 50px; /* Extra padding for mobile view */
     text-align: center;
   }
   

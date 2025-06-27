@@ -49,6 +49,8 @@ export class AppComponent implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.updateBodyClass();
+      // Close mobile menu on navigation
+      this.closeMenu();
     });
   }
 
@@ -75,5 +77,10 @@ export class AppComponent implements OnInit {
     return currentUrl === '/' || 
            currentUrl === '/home' || 
            currentUrl.startsWith('/restaurants');
+  }
+  
+  // Method to close mobile menu
+  closeMenu(): void {
+    this.isMenuCollapsed = true;
   }
 }
