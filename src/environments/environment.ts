@@ -3,6 +3,6 @@
 //   apiUrl: 'https://localhost:7135/api'
 // };
  export const environment = {
-  production: false,
+  production: true,
   apiUrl: 'http://fod.runasp.net/api'
 }; 
