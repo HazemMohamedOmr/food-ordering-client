@@ -154,8 +154,6 @@ export class AuthService {
       console.log('Admin role detected from session storage');
       isAdmin = true;
     }
-    
-    console.log('isAdmin check:', { user, role: user?.role, isAdmin });
     return isAdmin;
   }
 

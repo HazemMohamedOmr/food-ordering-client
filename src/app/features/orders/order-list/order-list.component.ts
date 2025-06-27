@@ -5,6 +5,20 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Order, OrderStatus } from '../../../core/models/order.model';
 import { SharedModule } from '../../../shared/shared.module';
 
+interface OrderWithUserItems {
+  id: string;
+  restaurantName: string;
+  orderDate: string;
+  closedAt: string | null;
+  status: OrderStatus;
+  managerName: string;
+  deliveryFee: number;
+  deliveryFeeShare: number;
+  userItems: any[];
+  userPaymentStatus: number;
+  userTotal: number;
+}
+
 @Component({
   selector: 'app-order-list',
   templateUrl: './order-list.component.html',
@@ -13,10 +27,13 @@ import { SharedModule } from '../../../shared/shared.module';
   imports: [SharedModule]
 })
 export class OrderListComponent implements OnInit {
-  activeOrders: Order[] = [];
-  orderHistory: Order[] = [];
+  activeOrders: OrderWithUserItems[] = [];
+  orderHistory: OrderWithUserItems[] = [];
   isLoading = false;
   errorMessage = '';
+
+  // For template use
+  OrderStatus = OrderStatus;
 
   constructor(
     private orderService: OrderService,
@@ -39,8 +56,9 @@ export class OrderListComponent implements OnInit {
 
     // Load active orders
     this.orderService.getActiveOrders().subscribe({
-      next: (orders) => {
-        this.activeOrders = orders;
+      next: (orders: any) => {
+        console.log('Active orders response:', orders);
+        this.activeOrders = this.processOrdersResponse(orders);
         this.loadOrderHistory();
       },
       error: (error) => {
@@ -52,8 +70,9 @@ export class OrderListComponent implements OnInit {
 
   loadOrderHistory(): void {
     this.orderService.getMyOrderHistory().subscribe({
-      next: (orders) => {
-        this.orderHistory = orders;
+      next: (orders: any) => {
+        console.log('Order history response:', orders);
+        this.orderHistory = this.processOrdersResponse(orders);
         this.isLoading = false;
       },
       error: (error) => {
@@ -61,6 +80,47 @@ export class OrderListComponent implements OnInit {
         this.errorMessage = error.message || 'Failed to load order history';
       }
     });
+  }
+
+  processOrdersResponse(orders: any[]): OrderWithUserItems[] {
+    if (!Array.isArray(orders)) {
+      console.error('Expected orders array, got:', orders);
+      return [];
+    }
+    
+    return orders.map(order => {
+      // Check if it's already in the expected format
+      if (order.restaurantName !== undefined) {
+        return order as OrderWithUserItems;
+      }
+      
+      // Convert from old format
+      return {
+        id: order.id || '',
+        restaurantName: order.restaurant?.name || 'Unknown Restaurant',
+        orderDate: order.orderDate || new Date().toISOString(),
+        closedAt: order.closedAt,
+        status: order.status || OrderStatus.Open,
+        managerName: order.manager?.name || 'Unknown Manager',
+        deliveryFee: order.restaurant?.deliveryFee || 0,
+        deliveryFeeShare: 0,
+        userItems: order.orderItems || [],
+        userPaymentStatus: 0,
+        userTotal: this.calculateOrderTotal(order)
+      };
+    });
+  }
+
+  calculateOrderTotal(order: any): number {
+    if (!order.orderItems || !Array.isArray(order.orderItems)) {
+      return 0;
+    }
+    
+    const itemsTotal = order.orderItems.reduce((total: number, item: any) => {
+      return total + ((item.menuItem?.price || 0) * (item.quantity || 1));
+    }, 0);
+    
+    return itemsTotal;
   }
 
   viewOrder(orderId: string): void {
@@ -81,5 +141,10 @@ export class OrderListComponent implements OnInit {
       case OrderStatus.Closed: return 'Closed';
       default: return 'Unknown';
     }
+  }
+
+  formatDate(date: string | null | undefined): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleString();
   }
 } 

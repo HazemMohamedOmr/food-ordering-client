@@ -52,15 +52,6 @@
             </div>
             
             <div class="restaurant-actions" *ngIf="authService.isLoggedIn">
-              <!-- Order Status Banner -->
-              <div class="order-status-banner mb-3" *ngIf="hasActiveOrder">
-                <div class="alert alert-success">
-                  <i class="fas fa-check-circle me-2"></i> Active order in progress! Users can add items to their cart.
-                  <button *ngIf="authService.isManager || authService.isAdmin" class="btn btn-sm btn-danger ms-3" (click)="closeOrder()">
-                    <i class="fas fa-times-circle me-1"></i> Close Order
-                  </button>
-                </div>
-              </div>
               
               <button class="btn btn-primary btn-action" (click)="startOrder()" *ngIf="(authService.isManager || authService.isAdmin) && !hasActiveOrder">
                 <i class="fas fa-plus-circle me-2"></i> Start New Order
@@ -165,6 +156,13 @@
             </div>
           </div>
           
+          <div class="col-12 mb-4" *ngIf="hasActiveOrder">
+            <div class="alert alert-success">
+              <i class="fas fa-check-circle me-2"></i> 
+              This restaurant has an active order! You can now add items to your order.
+            </div>
+          </div>
+          
           @for (item of menuItems; track trackByMenuItem($index, item)) {
             <div class="col-md-6 col-lg-4 mb-4">
               <div class="menu-item-card">
@@ -247,4 +245,41 @@
       <i class="fas fa-arrow-left me-2"></i> Back to Restaurants
     </button>
   </div>
-</div> 
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Item to Order</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="selectedItem" class="selected-item-details">
+          <h4>{{ selectedItem.name }}</h4>
+          <p class="text-muted">{{ selectedItem.description }}</p>
+          <div class="price-quantity d-flex justify-content-between align-items-center mb-3">
+            <div class="price">${{ selectedItem.price.toFixed(2) }}</div>
+            <div class="quantity-control">
+              <button class="btn-quantity" (click)="decreaseQuantity(selectedItem)">-</button>
+              <span class="quantity">{{ getItemQuantity(selectedItem) }}</span>
+              <button class="btn-quantity" (click)="increaseQuantity(selectedItem)">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="itemNote">Special Instructions (optional)</label>
+            <textarea id="itemNote" class="form-control" rows="3" 
+                     placeholder="Any special requests or notes for this item?" 
+                     [(ngModel)]="itemNote"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="confirmAddToCart()">Add to Order</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showModal"></div> 

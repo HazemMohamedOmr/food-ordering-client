@@ -7,15 +7,19 @@ import { OrderItem } from '../../../core/models/order-item.model';
 import { OrderService } from '../../../core/services/order.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
+import { Restaurant } from '../../../core/models/restaurant.model';
 
-interface OrderWithItems extends Order {
+interface OrderWithItems extends Omit<Order, 'restaurant'> {
   userItems?: {[userId: string]: {
     userName: string;
     items: OrderItem[];
     totalAmount: number;
+    deliveryFee: number;
     isPaid: boolean;
   }};
   totalAmount?: number;
+  deliveryFee?: number;
+  restaurant?: Restaurant;
 }
 
 @Component({
@@ -72,8 +76,31 @@ export class OrderManagementComponent implements OnInit {
     this.errorMessage = '';
     
     this.orderService.getActiveOrders().subscribe({
-      next: (orders) => {
-        this.activeOrders = orders;
+      next: (orders: any) => {
+        // Process the new response format
+        this.activeOrders = orders.map((order: any) => {
+          // Convert to our OrderWithItems format
+          return {
+            ...order,
+            id: order.id,
+            restaurant: {
+              id: '',
+              name: order.restaurantName || 'N/A',
+              description: '',
+              address: '',
+              phoneNumber: '',
+              deliveryFee: order.deliveryFee || 0
+            },
+            restaurantId: '',
+            managerId: '',
+            status: order.status,
+            orderDate: order.orderDate,
+            closedAt: order.closedAt,
+            deliveryFee: order.deliveryFee
+          } as OrderWithItems;
+        });
+        
+        console.log('Processed active orders:', this.activeOrders);
         this.isLoading = false;
       },
       error: (error: any) => {
@@ -88,8 +115,31 @@ export class OrderManagementComponent implements OnInit {
     this.errorMessage = '';
     
     this.orderService.getOrderHistory().subscribe({
-      next: (orders) => {
-        this.orderHistory = orders;
+      next: (orders: any) => {
+        // Process the new response format
+        this.orderHistory = orders.map((order: any) => {
+          // Convert to our OrderWithItems format
+          return {
+            ...order,
+            id: order.id,
+            restaurant: {
+              id: '',
+              name: order.restaurantName || 'N/A',
+              description: '',
+              address: '',
+              phoneNumber: '',
+              deliveryFee: order.deliveryFee || 0
+            },
+            restaurantId: '',
+            managerId: '',
+            status: order.status,
+            orderDate: order.orderDate,
+            closedAt: order.closedAt,
+            deliveryFee: order.deliveryFee
+          } as OrderWithItems;
+        });
+        
+        console.log('Processed order history:', this.orderHistory);
         this.isLoading = false;
       },
       error: (error: any) => {
@@ -99,8 +149,28 @@ export class OrderManagementComponent implements OnInit {
     });
   }
   
-  showCloseOrderConfirmation(order: Order): void {
-    this.orderToClose = order;
+  showCloseOrderConfirmation(order: any): void {
+    // If this is the new format with restaurantName, convert it to Order format
+    if (order.restaurantName !== undefined) {
+      this.orderToClose = {
+        id: order.id,
+        restaurantId: '',
+        managerId: '',
+        status: order.status,
+        orderDate: order.orderDate,
+        closedAt: order.closedAt,
+        restaurant: {
+          id: '',
+          name: order.restaurantName,
+          description: '',
+          address: '',
+          phoneNumber: '',
+          deliveryFee: order.deliveryFee || 0
+        }
+      };
+    } else {
+      this.orderToClose = order;
+    }
   }
   
   cancelCloseOrder(): void {
@@ -129,7 +199,7 @@ export class OrderManagementComponent implements OnInit {
         
         // If this was the selected order, refresh its details
         if (this.selectedOrder && this.selectedOrder.id === closedOrderId) {
-          this.viewOrderDetails(this.selectedOrder);
+          this.viewOrderDetails(this.selectedOrder as unknown as Order);
         }
       },
       error: (error: any) => {
@@ -139,28 +209,53 @@ export class OrderManagementComponent implements OnInit {
     });
   }
   
-  viewOrderDetails(order: Order): void {
+  viewOrderDetails(order: any): void {
     this.isLoadingDetails = true;
     this.errorMessage = '';
-    this.selectedOrder = { ...order } as OrderWithItems;
     
-    this.orderService.getAllOrderItems(order.id!).subscribe({
-      next: (items) => {
+    // Handle the new format with restaurantName directly
+    if (order.restaurantName !== undefined) {
+      this.selectedOrder = {
+        ...order,
+        id: order.id,
+        restaurantId: '',
+        managerId: '',
+        status: order.status,
+        orderDate: order.orderDate,
+        closedAt: order.closedAt,
+        restaurant: {
+          id: '',
+          name: order.restaurantName,
+          description: '',
+          address: '',
+          phoneNumber: '',
+          deliveryFee: order.deliveryFee || 0
+        },
+        deliveryFee: order.deliveryFee
+      } as OrderWithItems;
+      
+      // If the order already has userItems array, process it directly
+      if (order.userItems && Array.isArray(order.userItems) && order.userItems.length > 0) {
+        console.log('Processing embedded userItems from order', order.userItems);
+        
         // Group items by user
         const userItems: {[userId: string]: {
           userName: string;
           items: OrderItem[];
           totalAmount: number;
+          deliveryFee: number;
           isPaid: boolean;
         }} = {};
         
         let totalAmount = 0;
+        const deliveryFee = order.deliveryFee || 0;
         
-        items.forEach(item => {
+        // Process items from the embedded userItems
+        order.userItems.forEach((item: any) => {
           const userId = item.userId;
-          const userName = item.user?.name || 'Unknown User';
-          const itemPrice = item.menuItem?.price || 0;
-          const itemTotal = itemPrice * item.quantity;
+          const userName = item.userName || 'Unknown User';
+          const itemPrice = item.price || 0;
+          const itemTotal = item.total || (itemPrice * item.quantity);
           
           totalAmount += itemTotal;
           
@@ -169,25 +264,221 @@ export class OrderManagementComponent implements OnInit {
               userName,
               items: [],
               totalAmount: 0,
+              deliveryFee: 0, // Will calculate after counting users
               isPaid: false // We'll update this later if needed
             };
           }
           
-          userItems[userId].items.push(item);
+          // Convert to our OrderItem format
+          const orderItem: OrderItem = {
+            id: item.id,
+            orderId: order.id,
+            userId: item.userId,
+            menuItemId: item.menuItemId || '',
+            quantity: item.quantity,
+            note: item.note,
+            menuItem: {
+              id: item.menuItemId || '',
+              name: item.menuItemName,
+              description: '',
+              price: item.price,
+              restaurantId: ''
+            },
+            user: {
+              id: item.userId,
+              name: item.userName,
+              email: ''
+            }
+          };
+          
+          userItems[userId].items.push(orderItem);
           userItems[userId].totalAmount += itemTotal;
         });
         
-        // Check payment status for each user in closed orders
-        if (order.status === OrderStatus.Closed && order.payments) {
-          order.payments.forEach(payment => {
-            if (payment.userId && userItems[payment.userId]) {
-              userItems[payment.userId].isPaid = payment.status === PaymentStatus.Paid;
-            }
+        // Calculate delivery fee per user - divide equally
+        const userCount = Object.keys(userItems).length;
+        if (userCount > 0 && deliveryFee > 0) {
+          const deliveryFeePerUser = order.deliveryFeeShare || (deliveryFee / userCount);
+          
+          // Assign delivery fee to each user
+          Object.keys(userItems).forEach(userId => {
+            userItems[userId].deliveryFee = deliveryFeePerUser;
+            // Add delivery fee to user total
+            userItems[userId].totalAmount += deliveryFeePerUser;
           });
+          
+          // Add delivery fee to total amount
+          totalAmount += deliveryFee;
         }
         
-        this.selectedOrder!.userItems = userItems;
-        this.selectedOrder!.totalAmount = totalAmount;
+        this.selectedOrder.userItems = userItems;
+        this.selectedOrder.totalAmount = totalAmount;
+        this.selectedOrder.deliveryFee = deliveryFee;
+        this.isLoadingDetails = false;
+        return;
+      }
+    } else {
+      this.selectedOrder = { ...order } as OrderWithItems;
+    }
+    
+    this.orderService.getAllOrderItems(order.id).subscribe({
+      next: (response: any) => {
+        // Check if response is in the new format
+        if (response.items && Array.isArray(response.items)) {
+          console.log('Received new API response format', response);
+          
+          // Update restaurant name if available in the response
+          if (response.restaurantName) {
+            if (!this.selectedOrder!.restaurant) {
+              this.selectedOrder!.restaurant = { 
+                id: '', 
+                name: response.restaurantName,
+                description: '',
+                address: '',
+                phoneNumber: '',
+                deliveryFee: response.deliveryFee || 0
+              };
+            } else {
+              this.selectedOrder!.restaurant.name = response.restaurantName;
+              this.selectedOrder!.restaurant.deliveryFee = response.deliveryFee || 0;
+            }
+          }
+          
+          // Group items by user
+          const userItems: {[userId: string]: {
+            userName: string;
+            items: OrderItem[];
+            totalAmount: number;
+            deliveryFee: number;
+            isPaid: boolean;
+          }} = {};
+          
+          let totalAmount = 0;
+          const deliveryFee = response.deliveryFee || 0;
+          
+          // Process items from the new format
+          response.items.forEach((item: any) => {
+            const userId = item.userId;
+            const userName = item.userName || 'Unknown User';
+            const itemPrice = item.price || 0;
+            const itemTotal = item.itemTotal || (itemPrice * item.quantity);
+            
+            totalAmount += itemTotal;
+            
+            if (!userItems[userId]) {
+              userItems[userId] = {
+                userName,
+                items: [],
+                totalAmount: 0,
+                deliveryFee: 0, // Will calculate after counting users
+                isPaid: false // We'll update this later if needed
+              };
+            }
+            
+            // Convert to our OrderItem format
+            const orderItem: OrderItem = {
+              id: item.id,
+              orderId: response.orderId || order.id,
+              userId: item.userId,
+              menuItemId: item.menuItemId,
+              quantity: item.quantity,
+              note: item.note,
+              menuItem: {
+                id: item.menuItemId,
+                name: item.menuItemName,
+                description: item.menuItemDescription,
+                price: item.price,
+                restaurantId: ''
+              },
+              user: {
+                id: item.userId,
+                name: item.userName,
+                email: ''
+              }
+            };
+            
+            userItems[userId].items.push(orderItem);
+            userItems[userId].totalAmount += itemTotal;
+          });
+          
+          // Calculate delivery fee per user - divide equally
+          const userCount = Object.keys(userItems).length;
+          if (userCount > 0 && deliveryFee > 0) {
+            const deliveryFeePerUser = deliveryFee / userCount;
+            
+            // Assign delivery fee to each user
+            Object.keys(userItems).forEach(userId => {
+              userItems[userId].deliveryFee = deliveryFeePerUser;
+              // Add delivery fee to user total
+              userItems[userId].totalAmount += deliveryFeePerUser;
+            });
+            
+            // Add delivery fee to total amount
+            totalAmount += deliveryFee;
+          }
+          
+          // Check payment status for each user in closed orders
+          if (order.status === OrderStatus.Closed && order.payments) {
+            order.payments.forEach((payment: any) => {
+              if (payment.userId && userItems[payment.userId]) {
+                userItems[payment.userId].isPaid = payment.status === PaymentStatus.Paid;
+              }
+            });
+          }
+          
+          this.selectedOrder!.userItems = userItems;
+          this.selectedOrder!.totalAmount = totalAmount;
+          this.selectedOrder!.deliveryFee = deliveryFee;
+        } else {
+          // Handle the old format (array of OrderItem)
+          const items = response as OrderItem[];
+          
+          // Group items by user
+          const userItems: {[userId: string]: {
+            userName: string;
+            items: OrderItem[];
+            totalAmount: number;
+            deliveryFee: number;
+            isPaid: boolean;
+          }} = {};
+          
+          let totalAmount = 0;
+          
+          items.forEach(item => {
+            const userId = item.userId;
+            const userName = item.user?.name || 'Unknown User';
+            const itemPrice = item.menuItem?.price || 0;
+            const itemTotal = itemPrice * item.quantity;
+            
+            totalAmount += itemTotal;
+            
+            if (!userItems[userId]) {
+              userItems[userId] = {
+                userName,
+                items: [],
+                totalAmount: 0,
+                deliveryFee: 0,
+                isPaid: false // We'll update this later if needed
+              };
+            }
+            
+            userItems[userId].items.push(item);
+            userItems[userId].totalAmount += itemTotal;
+          });
+          
+          // Check payment status for each user in closed orders
+          if (order.status === OrderStatus.Closed && order.payments) {
+            order.payments.forEach((payment: any) => {
+              if (payment.userId && userItems[payment.userId]) {
+                userItems[payment.userId].isPaid = payment.status === PaymentStatus.Paid;
+              }
+            });
+          }
+          
+          this.selectedOrder!.userItems = userItems;
+          this.selectedOrder!.totalAmount = totalAmount;
+        }
+        
         this.isLoadingDetails = false;
       },
       error: (error: any) => {

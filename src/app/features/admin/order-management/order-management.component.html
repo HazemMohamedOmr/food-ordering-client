@@ -129,8 +129,14 @@
                           <td>{{ item.menuItem?.name || 'Unknown Item' }}</td>
                           <td>${{ item.menuItem?.price?.toFixed(2) || '0.00' }}</td>
                           <td>{{ item.quantity }}</td>
-                          <td>${{ (item.menuItem?.price || 0) * item.quantity | number:'1.2-2' }}</td>
+                          <td>${{ ((item.menuItem?.price || 0) * item.quantity).toFixed(2) }}</td>
                           <td>{{ item.note || '-' }}</td>
+                        </tr>
+                        <!-- Delivery fee row -->
+                        <tr *ngIf="selectedOrder.userItems[userId].deliveryFee > 0" class="delivery-fee-row">
+                          <td colspan="3" class="text-end fw-bold">Delivery Fee (per user):</td>
+                          <td>${{ selectedOrder.userItems[userId].deliveryFee.toFixed(2) }}</td>
+                          <td>-</td>
                         </tr>
                       </tbody>
                       <tfoot>
@@ -157,6 +163,14 @@
                     <table class="table">
                       <tbody>
                         <tr>
+                          <th>Items Total:</th>
+                          <td class="text-end">${{ (selectedOrder.totalAmount! - (selectedOrder.deliveryFee || 0)).toFixed(2) }}</td>
+                        </tr>
+                        <tr *ngIf="selectedOrder.deliveryFee">
+                          <th>Delivery Fee:</th>
+                          <td class="text-end">${{ selectedOrder.deliveryFee.toFixed(2) }}</td>
+                        </tr>
+                        <tr class="fw-bold">
                           <th>Total Amount:</th>
                           <td class="text-end">${{ selectedOrder.totalAmount?.toFixed(2) }}</td>
                         </tr>

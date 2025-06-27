@@ -29,16 +29,28 @@
                 <span class="badge rounded-pill {{ getOrderStatusBadgeClass(order.status) }}">
                   {{ getOrderStatusText(order.status) }}
                 </span>
-                <small class="text-muted">{{ order.orderDate | date:'medium' }}</small>
+                <small class="text-muted">{{ formatDate(order.orderDate) }}</small>
               </div>
             </div>
             <div class="card-body">
-              <h5 class="card-title">{{ order.restaurant?.name || 'Restaurant' }}</h5>
-              <p class="card-text">Manager: {{ order.manager?.name || 'Unknown' }}</p>
+              <h5 class="card-title">{{ order.restaurantName }}</h5>
+              <p class="card-text">Manager: {{ order.managerName }}</p>
               <p class="card-text">
                 <small class="text-muted">
                   <i class="bi bi-bag me-1"></i>
-                  {{ order.orderItems?.length || 0 }} items
+                  {{ order.userItems?.length || 0 }} items
+                </small>
+              </p>
+              <p *ngIf="order.userTotal > 0" class="card-text">
+                <small class="text-muted">
+                  <i class="bi bi-currency-dollar me-1"></i>
+                  Your Total: ${{ order.userTotal.toFixed(2) }}
+                </small>
+              </p>
+              <p *ngIf="order.deliveryFeeShare > 0" class="card-text">
+                <small class="text-muted">
+                  <i class="bi bi-truck me-1"></i>
+                  Delivery Fee: ${{ order.deliveryFeeShare.toFixed(2) }}
                 </small>
               </p>
             </div>
@@ -69,23 +81,45 @@
                 <span class="badge rounded-pill {{ getOrderStatusBadgeClass(order.status) }}">
                   {{ getOrderStatusText(order.status) }}
                 </span>
-                <small class="text-muted">{{ order.orderDate | date:'medium' }}</small>
+                <small class="text-muted">{{ formatDate(order.orderDate) }}</small>
               </div>
             </div>
             <div class="card-body">
-              <h5 class="card-title">{{ order.restaurant?.name || 'Restaurant' }}</h5>
-              <p class="card-text">Manager: {{ order.manager?.name || 'Unknown' }}</p>
+              <h5 class="card-title">{{ order.restaurantName }}</h5>
+              <p class="card-text">Manager: {{ order.managerName }}</p>
               <p class="card-text">
                 <small class="text-muted">
                   <i class="bi bi-bag me-1"></i>
-                  {{ order.orderItems?.length || 0 }} items
+                  {{ order.userItems?.length || 0 }} items
+                </small>
+              </p>
+              <p *ngIf="order.userTotal > 0" class="card-text">
+                <small class="text-muted">
+                  <i class="bi bi-currency-dollar me-1"></i>
+                  Your Total: ${{ order.userTotal.toFixed(2) }}
+                </small>
+              </p>
+              <p *ngIf="order.deliveryFeeShare > 0" class="card-text">
+                <small class="text-muted">
+                  <i class="bi bi-truck me-1"></i>
+                  Delivery Fee: ${{ order.deliveryFeeShare.toFixed(2) }}
                 </small>
               </p>
               <p class="card-text" *ngIf="order.closedAt">
                 <small class="text-muted">
                   <i class="bi bi-calendar-check me-1"></i>
-                  Closed at: {{ order.closedAt | date:'medium' }}
+                  Closed at: {{ formatDate(order.closedAt) }}
                 </small>
+              </p>
+              <p class="card-text" *ngIf="order.userPaymentStatus === 2">
+                <span class="badge bg-success">
+                  <i class="bi bi-check-circle me-1"></i> Paid
+                </span>
+              </p>
+              <p class="card-text" *ngIf="order.userPaymentStatus === 1">
+                <span class="badge bg-danger">
+                  <i class="bi bi-exclamation-circle me-1"></i> Unpaid
+                </span>
               </p>
             </div>
             <div class="card-footer bg-transparent">

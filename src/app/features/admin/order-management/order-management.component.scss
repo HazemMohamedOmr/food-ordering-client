@@ -164,4 +164,14 @@ table {
   .card-header div {
     margin-top: 10px;
   }
+}
+
+/* Delivery fee row styling */
+.delivery-fee-row {
+  background-color: #f8f9fa;
+  font-style: italic;
+}
+
+.delivery-fee-row td {
+  border-top: 1px dashed #dee2e6;
 } 

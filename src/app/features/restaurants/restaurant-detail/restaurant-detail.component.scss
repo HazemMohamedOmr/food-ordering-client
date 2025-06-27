@@ -572,4 +572,87 @@
   .restaurant-actions {
     justify-content: center;
   }
+}
+
+/* Modal Styles */
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-backdrop {
+  z-index: 1040;
+}
+
+.modal {
+  z-index: 1050;
+}
+
+.selected-item-details {
+  h4 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .price-quantity {
+    margin: 1rem 0;
+    
+    .price {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+  }
+  
+  .quantity-control {
+    display: flex;
+    align-items: center;
+    
+    .btn-quantity {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      
+      &:hover {
+        background-color: #e0e0e0;
+      }
+    }
+    
+    .quantity {
+      margin: 0 10px;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+    }
+  }
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    
+    &:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
 } 
