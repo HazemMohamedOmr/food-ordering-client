@@ -5,6 +5,7 @@ import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { CartService } from './core/services/cart.service';
+import { ScrollService } from './core/services/scroll.service';
 import { filter } from 'rxjs/operators';
 
 @Component({
@@ -23,11 +24,15 @@ export class AppComponent implements OnInit {
     public authService: AuthService,
     public cartService: CartService,
     private router: Router,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private scrollService: ScrollService
   ) {}
 
   ngOnInit(): void {
     this.checkScroll();
+    
+    // Set up cross-browser scroll restoration
+    this.scrollService.setupScrollRestoration();
     
     // Initialize AOS (Animate On Scroll)
     if (typeof window !== 'undefined') {
