@@ -31,8 +31,9 @@ export class AppComponent implements OnInit {
     
     // Initialize AOS (Animate On Scroll)
     if (typeof window !== 'undefined') {
-      import('aos').then(aos => {
-        aos.init({
+      import('aos').then(module => {
+        const AOS = module.default;
+        AOS.init({
           duration: 1000,
           once: true,
           easing: 'ease',
