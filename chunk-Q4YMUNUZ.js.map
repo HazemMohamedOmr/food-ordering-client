@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/shared.module.ts"],
+  "sourcesContent": ["import { NgModule } from '@angular/core';\r\nimport { CommonModule } from '@angular/common';\r\nimport { RouterModule } from '@angular/router';\r\nimport { FormsModule, ReactiveFormsModule } from '@angular/forms';\r\n\r\n@NgModule({\r\n  declarations: [\r\n    // Shared components and directives will go here\r\n  ],\r\n  imports: [\r\n    CommonModule,\r\n    RouterModule,\r\n    FormsModule,\r\n    ReactiveFormsModule\r\n  ],\r\n  exports: [\r\n    // Export modules, components and directives that should be available to any module that imports SharedModule\r\n    CommonModule,\r\n    RouterModule,\r\n    FormsModule,\r\n    ReactiveFormsModule\r\n  ]\r\n})\r\nexport class SharedModule { }\r\n"],
+  "mappings": ";;;;;;;;;;;;;;AAuBM,IAAO,eAAP,MAAO,cAAY;;qCAAZ,eAAY;EAAA;wEAAZ,cAAY,CAAA;;IAbrB;IACA;IACA;IACA;;IAIA;IACA;IACA;IACA;EAAmB,EAAA,CAAA;;;sEAGV,cAAY,CAAA;UAlBxB;WAAS;MACR,cAAc;;;MAGd,SAAS;QACP;QACA;QACA;QACA;;MAEF,SAAS;;QAEP;QACA;QACA;QACA;;KAEH;;;",
+  "names": []
+}

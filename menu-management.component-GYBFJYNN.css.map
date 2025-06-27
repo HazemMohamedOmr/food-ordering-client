@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/admin/menu-management/menu-management.component.scss"],
+  "sourcesContent": [".table-responsive {\r\n  overflow-x: auto;\r\n}\r\n\r\n.btn-group {\r\n  .btn {\r\n    margin-right: 0.25rem;\r\n    \r\n    &:last-child {\r\n      margin-right: 0;\r\n    }\r\n  }\r\n}\r\n\r\n.card-header {\r\n  background-color: #f8f9fa;\r\n}\r\n\r\n@media (max-width: 768px) {\r\n  .btn-group {\r\n    display: flex;\r\n    flex-direction: column;\r\n    \r\n    .btn {\r\n      margin-right: 0;\r\n      margin-bottom: 0.25rem;\r\n      \r\n      &:last-child {\r\n        margin-bottom: 0;\r\n      }\r\n    }\r\n  }\r\n} "],
+  "mappings": ";AAAA,CAAA;AACE,cAAA;;AAIA,CAAA,UAAA,CAAA;AACE,gBAAA;;AAEA,CAHF,UAGE,CAHF,GAGE;AACE,gBAAA;;AAKN,CAAA;AACE,oBAAA;;AAGF,OAAA,CAAA,SAAA,EAAA;AACE,GAdA;AAeE,aAAA;AACA,oBAAA;;AAEA,GAlBF,UAkBE,CAlBF;AAmBI,kBAAA;AACA,mBAAA;;AAEA,GAtBJ,UAsBI,CAtBJ,GAsBI;AACE,mBAAA;;;",
+  "names": []
+}

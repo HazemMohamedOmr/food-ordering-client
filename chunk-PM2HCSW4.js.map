@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/features/restaurants/restaurants.routes.ts"],
+  "sourcesContent": ["import { Routes } from '@angular/router';\r\n\r\nexport const RESTAURANTS_ROUTES: Routes = [\r\n  {\r\n    path: '',\r\n    loadComponent: () => import('./restaurant-list/restaurant-list.component').then(m => m.RestaurantListComponent),\r\n    title: 'Restaurants - QualiFoodie'\r\n  },\r\n  {\r\n    path: ':id',\r\n    loadComponent: () => import('./restaurant-detail/restaurant-detail.component').then(m => m.RestaurantDetailComponent),\r\n    title: 'Restaurant Details - QualiFoodie'\r\n  }\r\n]; "],
+  "mappings": ";;;AAEO,IAAM,qBAA6B;EACxC;IACE,MAAM;IACN,eAAe,MAAM,OAAO,qBAA6C,EAAE,KAAK,OAAK,EAAE,uBAAuB;IAC9G,OAAO;;EAET;IACE,MAAM;IACN,eAAe,MAAM,OAAO,qBAAiD,EAAE,KAAK,OAAK,EAAE,yBAAyB;IACpH,OAAO;;;",
+  "names": []
+}
