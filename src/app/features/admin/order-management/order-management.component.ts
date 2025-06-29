@@ -20,6 +20,7 @@ interface OrderWithItems extends Omit<Order, 'restaurant'> {
   totalAmount?: number;
   deliveryFee?: number;
   restaurant?: Restaurant;
+  userPaymentStatus?: PaymentStatus;
 }
 
 @Component({
@@ -140,7 +141,76 @@ export class OrderManagementComponent implements OnInit {
         });
         
         console.log('Processed order history:', this.orderHistory);
-        this.isLoading = false;
+        
+        // After processing all orders, fetch payment statuses for each closed order
+        const closedOrders = this.orderHistory.filter(order => order.status === OrderStatus.Closed);
+        
+        // Create a counter to track when all payment status requests are complete
+        let completedRequests = 0;
+        const totalRequests = closedOrders.length;
+        
+        if (totalRequests === 0) {
+          this.isLoading = false;
+          return;
+        }
+        
+        closedOrders.forEach(order => {
+          this.orderService.getOrderPaymentStatuses(order.id!).subscribe({
+            next: (response: any) => {
+              if (response && response.userPayments && Array.isArray(response.userPayments)) {
+                const userPaymentsMap: {[userId: string]: boolean} = {};
+                
+                // Create a map of user payment statuses
+                response.userPayments.forEach((payment: any) => {
+                  userPaymentsMap[payment.userId] = payment.status === PaymentStatus.Paid;
+                });
+                
+                // Find the order in our history and update user payment statuses
+                const orderIndex = this.orderHistory.findIndex(o => o.id === order.id);
+                if (orderIndex !== -1) {
+                  // Initialize userItems if not already present
+                  if (!this.orderHistory[orderIndex].userItems) {
+                    this.orderHistory[orderIndex].userItems = {};
+                  }
+                  
+                  // For each user in the payment response
+                  response.userPayments.forEach((payment: any) => {
+                    const userId = payment.userId;
+                    
+                    // If the user is not already in the userItems, add them
+                    if (!this.orderHistory[orderIndex].userItems![userId]) {
+                      this.orderHistory[orderIndex].userItems![userId] = {
+                        userName: payment.userName || 'Unknown User',
+                        items: [],
+                        totalAmount: payment.amount || 0,
+                        deliveryFee: 0,
+                        isPaid: payment.status === PaymentStatus.Paid
+                      };
+                    } else {
+                      // Otherwise just update the payment status
+                      this.orderHistory[orderIndex].userItems![userId].isPaid = payment.status === PaymentStatus.Paid;
+                    }
+                  });
+                }
+              }
+              
+              // Increment the counter and check if all requests are complete
+              completedRequests++;
+              if (completedRequests === totalRequests) {
+                this.isLoading = false;
+              }
+            },
+            error: (error) => {
+              console.error(`Error fetching payment statuses for order ${order.id}:`, error);
+              
+              // Increment the counter even on error and check if all requests are complete
+              completedRequests++;
+              if (completedRequests === totalRequests) {
+                this.isLoading = false;
+              }
+            }
+          });
+        });
       },
       error: (error: any) => {
         this.isLoading = false;
@@ -314,7 +384,31 @@ export class OrderManagementComponent implements OnInit {
         this.selectedOrder.userItems = userItems;
         this.selectedOrder.totalAmount = totalAmount;
         this.selectedOrder.deliveryFee = deliveryFee;
-        this.isLoadingDetails = false;
+        
+        // If the order is closed, fetch payment statuses
+        if (order.status === OrderStatus.Closed) {
+          this.orderService.getOrderPaymentStatuses(order.id).subscribe({
+            next: (response: any) => {
+              console.log('Payment statuses response:', response);
+              if (response && response.userPayments && Array.isArray(response.userPayments)) {
+                // Update payment status for each user
+                response.userPayments.forEach((payment: any) => {
+                  if (payment.userId && userItems[payment.userId]) {
+                    userItems[payment.userId].isPaid = payment.status === PaymentStatus.Paid;
+                  }
+                });
+              }
+              this.isLoadingDetails = false;
+            },
+            error: (error: any) => {
+              console.error('Error fetching payment statuses:', error);
+              this.isLoadingDetails = false;
+            }
+          });
+        } else {
+          this.isLoadingDetails = false;
+        }
+        
         return;
       }
     } else {
@@ -417,18 +511,33 @@ export class OrderManagementComponent implements OnInit {
             totalAmount += deliveryFee;
           }
           
-          // Check payment status for each user in closed orders
-          if (order.status === OrderStatus.Closed && order.payments) {
-            order.payments.forEach((payment: any) => {
-              if (payment.userId && userItems[payment.userId]) {
-                userItems[payment.userId].isPaid = payment.status === PaymentStatus.Paid;
-              }
-            });
-          }
-          
           this.selectedOrder!.userItems = userItems;
           this.selectedOrder!.totalAmount = totalAmount;
           this.selectedOrder!.deliveryFee = deliveryFee;
+          
+          // If the order is closed, fetch payment statuses
+          if (order.status === OrderStatus.Closed) {
+            this.orderService.getOrderPaymentStatuses(order.id).subscribe({
+              next: (paymentResponse: any) => {
+                console.log('Payment statuses response:', paymentResponse);
+                if (paymentResponse && paymentResponse.userPayments && Array.isArray(paymentResponse.userPayments)) {
+                  // Update payment status for each user
+                  paymentResponse.userPayments.forEach((payment: any) => {
+                    if (payment.userId && userItems[payment.userId]) {
+                      userItems[payment.userId].isPaid = payment.status === PaymentStatus.Paid;
+                    }
+                  });
+                }
+                this.isLoadingDetails = false;
+              },
+              error: (error: any) => {
+                console.error('Error fetching payment statuses:', error);
+                this.isLoadingDetails = false;
+              }
+            });
+          } else {
+            this.isLoadingDetails = false;
+          }
         } else {
           // Handle the old format (array of OrderItem)
           const items = response as OrderItem[];
@@ -466,20 +575,33 @@ export class OrderManagementComponent implements OnInit {
             userItems[userId].totalAmount += itemTotal;
           });
           
-          // Check payment status for each user in closed orders
-          if (order.status === OrderStatus.Closed && order.payments) {
-            order.payments.forEach((payment: any) => {
-              if (payment.userId && userItems[payment.userId]) {
-                userItems[payment.userId].isPaid = payment.status === PaymentStatus.Paid;
-              }
-            });
-          }
-          
           this.selectedOrder!.userItems = userItems;
           this.selectedOrder!.totalAmount = totalAmount;
+          
+          // If the order is closed, fetch payment statuses
+          if (order.status === OrderStatus.Closed) {
+            this.orderService.getOrderPaymentStatuses(order.id).subscribe({
+              next: (paymentResponse: any) => {
+                console.log('Payment statuses response:', paymentResponse);
+                if (paymentResponse && paymentResponse.userPayments && Array.isArray(paymentResponse.userPayments)) {
+                  // Update payment status for each user
+                  paymentResponse.userPayments.forEach((payment: any) => {
+                    if (payment.userId && userItems[payment.userId]) {
+                      userItems[payment.userId].isPaid = payment.status === PaymentStatus.Paid;
+                    }
+                  });
+                }
+                this.isLoadingDetails = false;
+              },
+              error: (error: any) => {
+                console.error('Error fetching payment statuses:', error);
+                this.isLoadingDetails = false;
+              }
+            });
+          } else {
+            this.isLoadingDetails = false;
+          }
         }
-        
-        this.isLoadingDetails = false;
       },
       error: (error: any) => {
         this.isLoadingDetails = false;
@@ -491,18 +613,68 @@ export class OrderManagementComponent implements OnInit {
   updatePaymentStatus(orderId: string, userId: string, status: PaymentStatus): void {
     this.processingPayment = true;
     this.errorMessage = '';
+    console.log(`Updating payment status: orderId=${orderId}, userId=${userId}, status=${status}`);
     
     this.orderService.updatePaymentStatus(orderId, userId, status).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('Payment status update response:', response);
         this.successMessage = 'Payment status updated successfully';
-        this.processingPayment = false;
         
-        // Update the local state
-        if (this.selectedOrder && this.selectedOrder.userItems && userId in this.selectedOrder.userItems) {
-          this.selectedOrder.userItems[userId].isPaid = status === PaymentStatus.Paid;
-        }
+        // Fetch the latest payment statuses to ensure we have accurate data
+        this.orderService.getOrderPaymentStatuses(orderId).subscribe({
+          next: (response: any) => {
+            console.log('Updated payment statuses:', response);
+            
+            if (response && response.userPayments && Array.isArray(response.userPayments) && 
+                this.selectedOrder && this.selectedOrder.userItems) {
+              
+              // Update payment statuses in the selected order
+              response.userPayments.forEach((payment: any) => {
+                if (payment.userId && this.selectedOrder!.userItems![payment.userId]) {
+                  this.selectedOrder!.userItems![payment.userId].isPaid = payment.status === PaymentStatus.Paid;
+                }
+              });
+            }
+            
+            // Also update the payment status in the order history if this order is in it
+            const historyOrderIndex = this.orderHistory.findIndex(o => o.id === orderId);
+            if (historyOrderIndex !== -1) {
+              // The order exists in history, make sure userItems is initialized
+              if (!this.orderHistory[historyOrderIndex].userItems) {
+                this.orderHistory[historyOrderIndex].userItems = {};
+              }
+              
+              if (response && response.userPayments && Array.isArray(response.userPayments)) {
+                response.userPayments.forEach((payment: any) => {
+                  const userId = payment.userId;
+                  
+                  // If the user exists in the order's userItems, update the payment status
+                  if (this.orderHistory[historyOrderIndex].userItems![userId]) {
+                    this.orderHistory[historyOrderIndex].userItems![userId].isPaid = payment.status === PaymentStatus.Paid;
+                  } else {
+                    // Otherwise add the user to the userItems
+                    this.orderHistory[historyOrderIndex].userItems![userId] = {
+                      userName: payment.userName || 'Unknown User',
+                      items: [],
+                      totalAmount: payment.amount || 0,
+                      deliveryFee: 0,
+                      isPaid: payment.status === PaymentStatus.Paid
+                    };
+                  }
+                });
+              }
+            }
+            
+            this.processingPayment = false;
+          },
+          error: (error) => {
+            console.error('Error fetching updated payment statuses:', error);
+            this.processingPayment = false;
+          }
+        });
       },
       error: (error: any) => {
+        console.error('Error updating payment status:', error);
         this.processingPayment = false;
         this.errorMessage = error.message || 'Failed to update payment status';
       }

@@ -215,10 +215,17 @@ export class OrderService {
   }
 
   updatePaymentStatus(orderId: string, userId: string, status: PaymentStatus): Observable<any> {
-    return this.http.put<any>(
-      `${this.apiUrl}/${orderId}/users/${userId}/payment-status`,
-      { status }
-    );
+    console.log(`Updating payment status for order ${orderId}, user ${userId} to status ${status}`);
+    
+    // Use the exact format specified by the user: orders/orderid/users/userid/payment-status
+    const url = `${environment.apiUrl}/orders/${orderId}/users/${userId}/payment-status`;
+    console.log('Request URL:', url);
+    
+    return this.http.put<any>(url, { status: Number(status) });
+  }
+
+  getOrderPaymentStatuses(orderId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${orderId}/payment-statuses`);
   }
 
   // Order Item Methods
